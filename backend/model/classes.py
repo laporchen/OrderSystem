@@ -1,14 +1,16 @@
 import datetime
+from typing import List
+
 
 class User:
-    def __init__(self, username : str, password : str, email : str, first_name : str, last_name : str,
-                 is_admin=False : bool):
+    def __init__(self, username: str, password: str, email: str, first_name: str, last_name: str, is_admin: bool, phone_number: str):
         self.username = username
         self.__password = password
         self.__email = email
         self.__first_name = first_name
         self.__last_name = last_name
         self.is_admin = is_admin
+        self.__phone_number = phone_number
 
     def __str__(self):
         return f"{self.username} {self.__email} {self.__first_name} {self.__last_name}"
@@ -21,21 +23,23 @@ class User:
 
 
 class Customer(User):
-    def __init__(self, username : str, password: str, email: str, first_name: str, last_name: str):  # primary key is username
-        super().__init__(username, password, email, first_name, last_name)
+    def __init__(self, username: str, password: str, email: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
+        super().__init__(username, password, email,
+                         first_name, last_name, False, phone_number)
         self.favorite_restaurants = []
         self.orders = []
 
 
 class Owner(User):
-    def __init__(self, username : str, password: str, email: str, first_name: str, last_name: str):  # primary key is username
-        super().__init__(username, password, email, first_name, last_name)
+    def __init__(self, username: str, password: str, email: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
+        super().__init__(username, password, email,
+                         first_name, last_name, False, phone_number)
         self.restaurant = None
 
 
-
 class Order:
-    def __init__(self, id : int, restaurant: str, items: str, total_price: str, date : datetime.date):  # primary key is id + restaurant
+    # primary key is id + restaurant
+    def __init__(self, id: int, restaurant: str, items: str, total_price: str, date: datetime.date):
         self.id = id
         self.restaurant = restaurant
         self.items = items
@@ -45,12 +49,23 @@ class Order:
         self.rate = None
 
 
+class Menu:
+    def __init__(self, restaurant_id, dishes: List):  # primary key is restaurant
+        self.id = id
+        self.restaurant = restaurant_id
+        self.dishes = dishes
+
+    def __str__(self):
+        return f"{self.restaurant} {self.dishes}"
+
+    def __repr__(self):
+        return f"{self.restaurant} {self.dishes}"
 
 
 class Restaurant:
-    def __init__(self, id : int, name : str, address : str, phone_numbers : str, description : str, menu : Menu, open_time : datetime.time, close_time : datetime.time):  # primary key is id
+    def __init__(self, id: int, name: str, address: str, phone_numbers: str, description: str, menu: Menu, open_time: datetime.time, close_time: datetime.time):  # primary key is id
         self.name = name
-        self.adress= adress 
+        self.adress = address
         self.phone_numbers = phone_numbers
         self.description = description
         self.menu = menu
@@ -68,35 +83,23 @@ class Restaurant:
 
 
 class Item:
-    def __init__(self, id : int, name : str, price : int, description : str, restaurant_id : int):  # primary key is id + restaurant
+    # primary key is id + restaurant
+    def __init__(self, id: int, name: str, price: int, description: str, restaurant_id: int):
         self.name = name
         self.id = id
         self.price = price
         self.description = description
-        self.restaurant = restaurant
+        self.restaurant = restaurant_id
 
     def __str__(self):
         return f"{self.name} {self.price} {self.description}"
 
     def __repr__(self):
         return f"{self.name} {self.price} {self.description}"
-
-
-class Menu:
-    def __init__(self, restaurant_id , dishes : Item[]):  # primary key is restaurant
-        self.id = id
-        self.restaurant = restaurant
-        self.dishes = dishes
-
-    def __str__(self):
-        return f"{self.restaurant} {self.dishes}"
-
-    def __repr__(self):
-        return f"{self.restaurant} {self.dishes}"
 
 
 class Address:
-    def __init__(self, city : str,distinct : str, road : str, lane : str, alley : str, no : str, floor : str):
+    def __init__(self, city: str, distinct: str, road: str, lane: str, alley: str, no: str, floor: str):
         self.city = city
         self.distinct = distinct
         self.road = road
@@ -104,11 +107,12 @@ class Address:
         self.alley = alley
         self.no = no
         self.floor = floor
-    
+
     def __str__(self):
         return f"{self.city} {self.distinct} {self.road} {self.lane} {self.alley} {self.no} {self.floor}"
 
     def __repr__(self):
         return f"{self.city} {self.distinct} {self.road} {self.lane} {self.alley} {self.no} {self.floor}"
 
-    def update(self, new_adress)
+    def update(self, new_adress):
+        self = new_adress

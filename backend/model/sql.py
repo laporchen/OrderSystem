@@ -7,22 +7,22 @@ db_settings = {
     "user": "root",
     "password": "yourMOM",
     "db": "OrderSystem",
-    "charset": "utf8" 
+    "charset": "utf8"
 }
 
 
-
-def main:
+def main():
     try:
         db = pymysql.connect(**db_settings)
         cursor = db.cursor()
     except Exception as e:
         print(e)
         return False
-    
-def createDataBase:
+
+
+def createDataBase():
     try:
-        
+        print("dummyy")
     except Exception as e:
         print(e, "something went wrong")
         return False
