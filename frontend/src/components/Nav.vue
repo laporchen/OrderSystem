@@ -2,7 +2,7 @@
 	<div id="nav">
 		<nav class="navbar navbar-expand navbar-light fixed-top">
 			<div class="container">
-				<router-link class="navbar-brand" to="/">Hello</router-link>
+				<router-link class="navbar-brand" to="/">Striver Eats</router-link>
 				<div class="collapse navbar-collapse">
 					<ul v-if="!user" class="navbar-nav ms-auto">
 						<li class="nav-item">
@@ -14,10 +14,10 @@
 							>
 						</li>
 					</ul>
-					<ul v-if="user" class="navbar-nav ms-auto">
+					<ul v-if="!user" class="navbar-nav ms-auto">
 						<li class="nav-item">
 							<router-link
-								to="/store"
+								to="/browse"
 								class="nav-link"
 							>Browse</router-link>
 						</li>

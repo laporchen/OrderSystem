@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    component: () => import('../components/TodoList.vue'),
-    alias: '/home'
+    component: () => import('../components/Browse.vue'),
+    alias: ['/home','/browse']
   },
   {
     path: '/login',
@@ -14,9 +14,21 @@ const routes = [
     component: () => import('../components/Register.vue')
   },
   {
+    path: '/cart',
+    component: () => import('../components/Cart.vue')
+  },
+  {
     path: '/orders',
     component: () => import('../components/OrderPage.vue')
-  }
+  },
+  {
+    path: '/favorite',
+    component: () => import('../components/Favorite.vue')
+  },
+  {
+    path: '/setting',
+    component: () => import('../components/Setting.vue')
+  },
 ]
 
 const router = createRouter({
