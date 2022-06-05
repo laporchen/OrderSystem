@@ -2,8 +2,8 @@
 	<div id="app">
 		<Nav />
 
-		<div class="auth-wrapper">
-			<div class="auth-inner">
+		<div class="wrapper">
+			<div class="inner">
 				<router-view />
 			</div>
 		</div>
@@ -12,13 +12,14 @@
 
 <script>
 import Nav from "./components/Nav.vue";
-import axios from "axios";
+//import axios from "axios";
 export default {
 	name: "App",
 	components: {
 		Nav,
 	},
 	async created() {
+		/*
 		const response = await axios.get("user").catch(() => {
 			this.$router.push("/login");
 		});
@@ -29,6 +30,8 @@ export default {
 			await this.$store.dispatch("user", response?.data);
 			await this.$store.dispatch("todoList", response?.data.tasks);
 		}
+		uncomment after backend is up
+		*/
 	},
 };
 </script>
@@ -51,22 +54,22 @@ body,
 html,
 #app,
 #root,
-.auth-wrapper {
+.wrapper {
 	width: 100%;
 	height: 100%;
 }
 #app {
 	text-align: center;
 }
-.auth-wrapper {
+.wrapper {
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
 	text-align: left;
 }
-.auth-inner {
-	max-height: 80%;
-	width: 600px;
+.inner {
+	max-height: 90%;
+	width: 800px;
 	margin: auto;
 	background-color: #fff;
 	box-shadow: 0px 14px 80px #ccc rgba(0, 0, 0, 0.5);
@@ -74,10 +77,10 @@ html,
 	border-radius: 15px;
 	overflow: scroll;
 }
-.auth-wrapper .form-control:focus {
+.wrapper .form-control:focus {
 	box-shadow: none;
 }
-.auth-wrapper h3 {
+.wrapper h3 {
 	text-align: center;
 	margin: 0;
 	line-height: 1;

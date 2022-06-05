@@ -12,7 +12,7 @@
                         <th>Name</th>
                         <th>Subtotal</th>
                     </thead>
-                    <tbody v-for="item in order.orderItems" :key="item.id">
+                    <tbody v-for="item in order.orderItems" :key="item">
                         <tr>
                             <td>{{item.quantity}}</td>
                             <td>{{item.name}}</td>
@@ -32,10 +32,10 @@ export default {
 	name: "OrderPage",
 	data() {
 		return {
-            orders : [
-                {orderNumber:1, store:"Striver Pizza", orderItems : [{id: 32,name:"Striver Special",quantity : 1, price :100}, {id : 31,name:"Raj Cola", quantity: 69,price:690}],time:"2022-06-04 13:32",status : "Complete"},
-                {orderNumber:2, store:"Demon Burger", orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"} 
-            ]
+            orders : {
+                1:{store:"Striver Pizza", orderItems : [{id: 32,name:"Striver Special",quantity : 1, price :100}, {id : 31,name:"Raj Cola", quantity: 69,price:690}],time:"2022-06-04 13:32",status : "Complete"},
+                2:{store:"Demon Burger", orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"} 
+            }
 		};
 	},
 	methods: {
