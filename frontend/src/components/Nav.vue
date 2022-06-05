@@ -2,7 +2,10 @@
 	<div id="nav">
 		<nav class="navbar navbar-expand navbar-light fixed-top">
 			<div class="container">
-				<router-link class="navbar-brand" to="/">Striver Eats</router-link>
+				<router-link class="navbar-brand" to="/">
+					<img width="30" height="30" src="@/assets/raj.png">
+					Striver Eats
+				</router-link>
 				<div class="collapse navbar-collapse">
 					<ul v-if="!user" class="navbar-nav ms-auto">
 						<li class="nav-item">
@@ -25,7 +28,7 @@
 							<router-link
 								to="/cart"
 								class="nav-link"
-							>Shopping Cart</router-link>
+							>Cart</router-link>
 						</li>
 						<li class="nav-item">
 							<router-link
@@ -37,7 +40,7 @@
 							<router-link
 								to="/favorite"
 								class="nav-link"
-							>My Favorite</router-link>
+							>Favorite</router-link>
 						</li>
 						<li class="nav-item">
 							<router-link

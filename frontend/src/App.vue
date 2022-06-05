@@ -68,14 +68,14 @@ html,
 	text-align: left;
 }
 .inner {
-	max-height: 90%;
+	max-height: 80%;
 	width: 800px;
 	margin: auto;
 	background-color: #fff;
 	box-shadow: 0px 14px 80px #ccc rgba(0, 0, 0, 0.5);
 	padding: 20px;
 	border-radius: 15px;
-	overflow: scroll;
+	overflow: auto;
 }
 .wrapper .form-control:focus {
 	box-shadow: none;

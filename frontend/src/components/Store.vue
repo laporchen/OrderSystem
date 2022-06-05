@@ -1,8 +1,23 @@
 <template>
     <div id="store">
         <h3>{{storeName}}</h3>
-        <h4>Phone   : {{storePhone}}</h4>
-        <h4>Address : {{storeAddress}}</h4>
+        <h5>{{storeAddress}}</h5>
+        <table>
+            <thead>
+                <th style="width:15%"><h4>{{storePhone}}</h4></th>
+                <th style="width:60%"></th>
+                <th style="width:15%">
+                    <template v-for="n in storeRating" :key="n">
+                        <span class="fa fa-star checked"></span>
+                    </template>
+                    <template v-for="n in 5 - storeRating" :key="n">
+                        <span class="fa fa-star"></span>
+                    </template>
+                </th>
+            </thead>
+        </table>
+
+
         <table>
             <thead>
                 <th>Item</th>
@@ -53,6 +68,7 @@ export default {
             storeName : null,
             storePhone : null,
             storeAddress : null,
+            storeRating : 0,
             storeItems : [],
             storeID : null,
             currentTotal : 0,
@@ -105,8 +121,9 @@ export default {
         //feteched data is assigned to the page here
         this.storeName = "Raj's Fast Food";
         this.storeID = 1;
-        this.storePhone = 12345789;
-        this.storeAddress = "Striver Road 69"
+        this.storePhone = "093112651";
+        this.storeAddress = "106台北市大安區和平東路一段162號";
+        this.storeRating = 4;
         this.storeItems = { 
            1:{id:1, name:"Striver Food",price:32},
            2:{id:2, name:"Striver Combo",price:100},
@@ -120,7 +137,6 @@ export default {
 <style scoped>
 
 table, th, td {
-  border: 1px solid;
 }
 table {
     width : 100%;
@@ -129,4 +145,7 @@ td ,th{
     width : 33%;
 }
 
+.checked {
+    color: gold;
+}
 </style>
