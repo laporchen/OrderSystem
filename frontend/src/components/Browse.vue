@@ -1,11 +1,23 @@
 <template>
     <div id="browse">
         <div style="text-align:center; padding-bottom:30px"><h2>Browse the food you like.</h2></div>
-        <table>
-            <th style="width:45%">Filter</th>
-            <th style="width:35%"><input v-model="minPrice" type=number placeholder="Min" style="width:50%"><input v-model="maxPrice" type=number placeholder="Max" style="width:50%"></th>
-            <th style="width:20% font-size:120%" hover="cursor:pointer">
-                <input type=range min="0" max="5" v-model="minRating"> 
+        <table style="font-size:120%">
+            <th style="width:5%">
+                <p @click="favOnly = !favOnly" :class="{fav:favOnly}"><i  class="fa fa-solid fa-heart"></i></p>
+            </th>
+            <th style="width:40%">
+                <input type="text" placeholder="Search" v-model="searchWord">
+            </th>
+            <th style="width:35%">
+                <input v-model="minPrice" type=number placeholder="Min" style="width:50%">
+                <input v-model="maxPrice" type=number placeholder="Max" style="width:50%">
+            </th>
+            <th style="width:20%" class="rateFilter">
+                <span @click="minRating = 1"  :class="1 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
+                <span @click="minRating = 2"  :class="2 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
+                <span @click="minRating = 3"  :class="3 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
+                <span @click="minRating = 4"  :class="4 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
+                <span @click="minRating = 5"  :class="5 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
             </th>
         </table>
         <hr>
@@ -14,17 +26,17 @@
                 <table style="font-size:120% " @click="gotoStore(store.storeID)">
                     <tbody>
                         <tr>
-                            <td style="width:5% ">
+                            <td style="width:5%">
                                 <i :class="{fav : userFav(store.storeID)} " class="fa fa-solid fa-heart" style="text-align:right"></i>
                             </td>
-                            <td style="width:40% "><b>{{store.name}}</b></td>
+                            <td style="width:40%"><b>{{store.name}}</b></td>
                             <td style="width:35%">{{store.priceRange[0]}}$ ~ {{store.priceRange[1]}}$</td>
                             <td style="width:20%">
                                 <template v-for="n in store.rate" :key="n">
-                                    <span class="fa fa-star checked"></span>
+                                    <i class="fa fa-star checked"></i>
                                 </template>
                                 <template v-for="n in 5- store.rate" :key="n">
-                                    <span class="fa fa-star"></span>
+                                    <i class="fa fa-star"></i>
                                 </template>
                             </td>
                         </tr>
@@ -44,9 +56,11 @@ export default {
 	data() {
 		return {
             stores: [],
-            maxPrice: 9999,
+            maxPrice: 10000,
             minPrice: 0,
-            minRating:2
+            minRating:2,
+            searchWord: "",
+            favOnly : false,
 		};
 	},
 	methods: {
@@ -55,10 +69,14 @@ export default {
             let store = this.stores.filter(obj =>{
                 return obj.storeID == storeID;
             })
-            
-            if(store.length < 1) return false;
+            if(store.length < 1 ) return false;
             store = store[0];
-            return store.priceRange[0] >= this.minPrice && store.priceRange[1] <= this.maxPrice && store.rate >= this.minRating;
+            let storeName = store.name.toLowerCase();
+            return  store.priceRange[0] >= this.minPrice && 
+                    store.priceRange[1] <= this.maxPrice && 
+                    store.rate >= this.minRating && 
+                    storeName.includes(this.searchWord.toLowerCase()) &&
+                    (this.favOnly === false || this.userFav(storeID));
         },
         gotoStore(storeID) {
 			this.$router.push("/store/" + storeID);
@@ -79,13 +97,13 @@ export default {
         this.stores = [
             {storeID:1,name:"Raj's Fast Food", address:"Striver Road 69",phone:"123456789",openTime:[["1000","1300"],["1900","0100"]],priceRange:[95,125],rate:4},
             {storeID:2,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[595,1225],rate:5},
-            {storeID:3,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[295,1225],rate:2},
-            {storeID:4,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[95,225],rate:3},
+            {storeID:3,name:"Crgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[295,1225],rate:2},
+            {storeID:4,name:"Corgi's Fisj", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[95,225],rate:3},
             {storeID:5,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[5,12],rate:0},
-            {storeID:6,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[9,225],rate:1},
-            {storeID:7,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[29,1225],rate:4},
-            {storeID:8,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[29,122],rate:3},
-            {storeID:9,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[295,335],rate:3},
+            {storeID:6,name:"Corgi's Fi", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[9,225],rate:1},
+            {storeID:7,name:"Corgi' Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[29,1225],rate:4},
+            {storeID:8,name:"Corg's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[29,122],rate:3},
+            {storeID:9,name:"Corgist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[295,335],rate:3},
         ]
 	},
 };
@@ -110,6 +128,9 @@ tr:hover {
 }
 .fav {
     color: pink;
+}
+.rateFilter:hover {
+    cursor:pointer;
 }
 
 </style>

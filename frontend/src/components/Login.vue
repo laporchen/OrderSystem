@@ -3,12 +3,12 @@
 		<form @submit.prevent="handleLogin">
 			<h3>Login</h3>
 			<div class="form-group">
-				<label>Email</label>
+				<label>Username</label>
 				<input
-					type="email"
+					type="username"
 					class="form-control"
-					v-model="email"
-					placeholder="Enter email"
+					v-model="username"
+					placeholder="Enter username"
 				/>
 			</div>
 			<div class="form-group">
@@ -31,10 +31,10 @@ export default {
 	name: "Login",
 	data() {
 		return {
-			email: "",
+			username: "",
 			password: "",
 			user: {
-				email: "",
+				username: "",
 				password: "",
 			},
 		};
@@ -42,12 +42,12 @@ export default {
 	methods: {
 		async handleLogin() {
 			const loginUser = {
-				email: this.email,
+				username: this.username,
 				password: this.password,
 			};
 			const response = await axios.post("login", loginUser);
 			if (response?.data?.status !== "success") {
-				alert("Email or password is incorrect");
+				alert("username or password is incorrect");
 				return;
 			} else {
 				await localStorage.setItem("token", response.data.token);

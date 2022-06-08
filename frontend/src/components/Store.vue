@@ -33,6 +33,7 @@
             </tbody>
         </table>
         <template v-if="cartHasItem">
+            <br>
             <h4>Your Cart : </h4>
             <table>
                 <thead>
@@ -136,13 +137,20 @@ export default {
 
 <style scoped>
 
-table, th, td {
-}
 table {
+	border-collapse : collapse;
     width : 100%;
+}
+tr {
+	border: solid;
+	border-width : 1px 0;
 }
 td ,th{
     width : 33%;
+}
+
+button {
+    width : 80%;
 }
 
 .checked {

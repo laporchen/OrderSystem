@@ -43,7 +43,7 @@ export default {
 	box-sizing: border-box;
 }
 body {
-	background-color: #5665a6;
+	background-color: #afafaf;
 	min-height: 100vh;
 	display: flex;
 }
@@ -69,13 +69,17 @@ html,
 }
 .inner {
 	max-height: 80%;
-	width: 800px;
+	width: 1000px;
 	margin: auto;
 	background-color: #fff;
 	box-shadow: 0px 14px 80px #ccc rgba(0, 0, 0, 0.5);
 	padding: 20px;
-	border-radius: 15px;
+	border-radius: 20px;
 	overflow: auto;
+}
+
+.inner > * {
+	margin :30px;
 }
 .wrapper .form-control:focus {
 	box-shadow: none;
@@ -90,3 +94,4 @@ html,
 	font-weight: 400;
 }
 </style>
+

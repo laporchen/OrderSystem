@@ -1,6 +1,6 @@
 <template>
 	<div id="register">
-		<form @submit.prevent="handleSubmit">
+		<form @submit.prevent="handleSubmit" >
 			<h3>Register</h3>
 			<div class="form-group">
 				<label>First Name</label>
@@ -21,12 +21,12 @@
 				/>
 			</div>
 			<div class="form-group">
-				<label>Phone Number</label>
+				<label>Username</label>
 				<input
 					type="tel"
 					class="form-control"
-					v-model="phoneNumber"
-					placeholder="Enter phone number"
+					v-model="username"
+					placeholder="Enter username"
 				/>
 			</div>
 			<div class="form-group">
@@ -79,7 +79,7 @@ export default {
 			first_name: "",
 			last_name: "",
 			email: "",
-			phoneNumber: "",
+			username: "",
 			password: "",
 			password_confirmation: "",
 			isSeller: false,
