@@ -93,5 +93,11 @@ html,
 .custom-control-label::before {
 	font-weight: 400;
 }
+.checked {
+    color: gold; 
+}
+.fav {
+    color: pink;
+}
 </style>
 

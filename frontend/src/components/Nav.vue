@@ -7,56 +7,76 @@
 					Striver Eats
 				</router-link>
 				<div class="collapse navbar-collapse">
-					<ul v-if="!user" class="navbar-nav ms-auto">
-						<li class="nav-item">
-							<router-link to="/login" class="nav-link">Login</router-link>
-						</li>
-						<li class="nav-item">
-							<router-link to="/register" class="nav-link"
-								>Register</router-link
-							>
-						</li>
-					</ul>
-					<ul v-if="!user" class="navbar-nav ms-auto">
-						<li class="nav-item">
-							<router-link
-								to="/browse"
-								class="nav-link"
-							>Browse</router-link>
-						</li>
-						<li class="nav-item">
-							<router-link
-								to="/cart"
-								class="nav-link"
-							>Cart</router-link>
-						</li>
-						<li class="nav-item">
-							<router-link
-								to="/orders"
-								class="nav-link"
-							>Orders</router-link>
-						</li>
-						<li class="nav-item">
-							<router-link
-								to="/favorite"
-								class="nav-link"
-							>Favorite</router-link>
-						</li>
-						<li class="nav-item">
-							<router-link
-								to="/setting"
-								class="nav-link"
-							>Setting</router-link>
-						</li>
-						<li class="nav-item">
-							<router-link
-								to="/login"
-								class="nav-link"
-								@click="logoutHandle"
-								>Logout</router-link
-							>
-						</li>
-					</ul>
+					<template v-if="!user">
+						<ul class="navbar-nav ms-auto">
+							<li class="nav-item">
+								<router-link to="/login" class="nav-link">Login</router-link>
+							</li>
+							<li class="nav-item">
+								<router-link to="/register" class="nav-link"
+									>Register</router-link
+								>
+							</li>
+						</ul>
+					</template>
+					<template v-else>
+						<ul class="navbar-nav ms-auto">
+							<template v-if="!seller">
+								<li class="nav-item">
+									<router-link
+										to="/browse"
+										class="nav-link"
+									>Browse</router-link>
+								</li>
+								<li class="nav-item">
+									<router-link
+										to="/cart"
+										class="nav-link"
+									>Cart</router-link>
+								</li>
+								<li class="nav-item">
+									<router-link
+										to="/orders"
+										class="nav-link"
+									>Orders</router-link>
+								</li>
+								<li class="nav-item">
+									<router-link
+										to="/favorite"
+										class="nav-link"
+									>Favorite</router-link>
+								</li>
+							</template>
+							<template v-else>
+								<li class="nav-item">
+									<router-link
+										to="/myStore"
+										class="nav-link"
+									>Store</router-link>
+								</li>
+								<li class="nav-item">
+									<router-link
+										to="/myOrders"
+										class="nav-link"
+									>Orders</router-link>
+								</li>
+							</template>
+							<li class="nav-item">
+								<router-link
+									to="/setting"
+									class="nav-link"
+								>Setting</router-link>
+							</li>
+							<li class="nav-item">
+								<router-link
+									to="/login"
+									class="nav-link"
+									@click="logoutHandle"
+									>Logout</router-link
+								>
+							</li>
+						</ul>
+					</template>
 				</div>
 			</div>
 		</nav>
@@ -76,6 +96,9 @@ export default {
 	},
 	computed: {
 		...mapGetters(["user"]),
+		...mapGetters(["seller"]),
 	},
+	mounted() {
+	}
 };
 </script>

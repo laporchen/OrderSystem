@@ -123,12 +123,6 @@ tr:hover {
     background-color:lightgrey;
 }
 
-.checked {
-    color: gold; 
-}
-.fav {
-    color: pink;
-}
 .rateFilter:hover {
     cursor:pointer;
 }

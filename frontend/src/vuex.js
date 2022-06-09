@@ -1,49 +1,29 @@
 import { createStore } from 'vuex'
-import axios from 'axios'
+//import axios from 'axios'
 const store = createStore({
     state() {
         return {
-            user: null,
-            todoList: [],
+            user: true,
+            seller: false,
         }
     },
     getters: {
         user: (state) => {
-            return state.login
+            return state.user;
         },
-        todoList: (state) => {
-            return state.todoList
+        seller: (state) => {
+            return state.seller;
         }
     },
     actions: {
         user(context, user) {
             context.commit('user', user)
         },
-        todoList(context, todoList) {
-            context.commit('todoList', todoList)
-        },
-        updateTodoList(context, todoList) {
-            context.commit('updateTodoList', todoList)
-        },
-        delTodoList(context, todoList, index) {
-            context.commit('delTodoList', todoList, index)
-        }
     },
     mutations: {
         user(state, user) {
             state.login = user;
         },
-        todoList(state, todoList) {
-            state.todoList = todoList;
-        },
-        async updateTodoList(state, todoList) {
-            state.todoList = todoList;
-            await axios.post("/update", state.todoList);
-        },
-        async delTodoList(state, todoList) {
-            state.todoList = todoList;
-            await axios.post("/update", state.todoList);
-        }
     }
 });
 

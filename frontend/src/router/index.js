@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import store from '../vuex'
 const routes = [
   {
     path: '/browse',
@@ -34,6 +35,14 @@ const routes = [
     component: () => import('../components/Setting.vue')
   },
   {
+    path: '/myStore',
+    component: () => import('../components/MyStore.vue')
+  },
+  {
+    path: '/myOrders',
+    component: () => import('../components/MyOrders.vue')
+  },
+  {
     path: '/:pathMatch(.*)*',
     component: () => import('../components/404.vue')
   }
@@ -42,6 +51,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+router.beforeEach((to) => {
+  console.log(to);
+  if(to.path === '/login' || to.path === '/register') {
+    return;
+  }
+  else if(store.getters.user == false){
+    router.push('/login');
+  }
 })
 
 export default router

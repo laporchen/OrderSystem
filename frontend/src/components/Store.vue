@@ -117,7 +117,6 @@ export default {
 	},
 	created() {
         // fetching store data here.
-        console.log(this.$route.params);
         // if store does not exist , redirect to home page
         //feteched data is assigned to the page here
         this.storeName = "Raj's Fast Food";
@@ -132,6 +131,9 @@ export default {
         // assigned users cart to useCart if it exists
         this.hasItem();
 	},
+    beforeUnmount() {
+        // save user's cart to database
+    }
 };
 </script>
 
