@@ -1,4 +1,5 @@
 import datetime
+from re import I, M
 
 from model import *
 
@@ -7,6 +8,8 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 from flask_cors import CORS
 import json
 import traceback
+
+
 
 keyLocation = './data/jwtKey.json'
 try:
@@ -43,22 +46,36 @@ def register():
     '''
     message = {"status": "fail"}
     if request.method == 'POST':
-        user = User(request.values.get('username'), request.values.get('password'), request.values.get(
-            'first_name'), request.values.get('last_name'), False, request.values.get('phone_number'))
-            
+        post_data = request.get_json()
+        userExist = sql.userExist(post_data['username'])
         # real usage 
-        if user.username is None:
-            return "username already exist", 400
+        if userExist:
+            message['message'] = "User already exist"
+            return jsonify(message)
 
-        if(request.form['isSeller'] == True):
-            new_owner = user
-            # some sql line to save user to the database
+        if(post_data["isSeller"]):
+            owner = Owner(post_data['username'], post_data['password'], post_data['first_name'], post_data['last_name'])
+            res = sql.insertSeller(owner)
+            if(res == False):
+                message['message'] = "Failed to register"
+                return jsonify(message)
+            else:
+                message['status'] = "success"
+                message['message'] = "Register successfully"
+                return jsonify(message)
         else:
-            new_user = user
-            # some sql line to save owner to the database
+            customer = Customer(post_data['username'], post_data['password'], post_data['first_name'], post_data['last_name'])
+            res = sql.insertCustomer(customer)
+            if(res == False):
+                message["message"] = "Failed to register"
+                return jsonify(message)
+            else:
+                message['status'] = "success"
+                message['message'] = "Register successfully"
+                return jsonify(message)
+
     else:
         return "Invalid request", 400
-    return "", 200
 
 
 @app.route('/api/login', methods=['POST'])

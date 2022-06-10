@@ -1,5 +1,5 @@
 import pymysql
-
+import classes as cls
 
 db_settings = {
     "host": "127.0.0.1",
@@ -23,6 +23,29 @@ def main():
 def createDataBase():
     try:
         print("dummyy")
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+
+
+def userExist(username):
+    result = True #some sql procedure to check if user exist
+    return result
+
+def insertUser(user: cls.User):
+    try:
+        print("dummyy")
+        # some sql procedure to insert user
+        return True
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+
+def insertSeller(seller: cls.Owner):
+    try:
+        print("dummyy")
+        # some sql procedure to insert seller 
+        return True
     except Exception as e:
         print(e, "something went wrong")
         return False

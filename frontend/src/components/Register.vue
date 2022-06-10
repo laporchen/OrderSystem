@@ -30,15 +30,6 @@
 				/>
 			</div>
 			<div class="form-group">
-				<label>Email</label>
-				<input
-					type="email"
-					class="form-control"
-					v-model="email"
-					placeholder="Enter email"
-				/>
-			</div>
-			<div class="form-group">
 				<label>Password</label>
 				<input
 					type="password"
@@ -78,7 +69,6 @@ export default {
 		return {
 			first_name: "",
 			last_name: "",
-			email: "",
 			username: "",
 			password: "",
 			password_confirmation: "",

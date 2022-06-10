@@ -3,13 +3,12 @@ from typing import List
 
 
 class User:
-    def __init__(self, username: str, password: str,first_name: str, last_name: str, is_admin: bool, phone_number: str):
+    def __init__(self, username: str, password: str,first_name: str, last_name: str, is_seller: bool):
         self.username = username
         self.__password = password
         self.__first_name = first_name
         self.__last_name = last_name
-        self.is_admin = is_admin
-        self.__phone_number = phone_number
+        self.is_seller = is_seller
 
     def __str__(self):
         return f"{self.username} {self.__first_name} {self.__last_name}"
@@ -22,17 +21,17 @@ class User:
 
 
 class Customer(User):
-    def __init__(self, username: str, password: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
+    def __init__(self, username: str, password: str, first_name: str, last_name: str):  # primary key is username
         super().__init__(username, password,
-                         first_name, last_name, False, phone_number)
+                         first_name, last_name, False)
         self.favorite_restaurants = []
         self.orders = []
 
 
 class Owner(User):
-    def __init__(self, username: str, password: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
+    def __init__(self, username: str, password: str, first_name: str, last_name: str):  # primary key is username
         super().__init__(username, password,
-                         first_name, last_name, False, phone_number)
+                         first_name, last_name, True)
         self.restaurant = None
 
 
