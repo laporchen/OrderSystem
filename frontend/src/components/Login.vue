@@ -52,8 +52,7 @@ export default {
 			} else {
 				await localStorage.setItem("token", response.data.token);
 				await this.$store.dispatch("user", response.data);
-				await this.$store.dispatch("todoList", response.data.tasks);
-				this.$router.push("/home");
+				this.$router.push("/browse");
 			}
 		},
 	},

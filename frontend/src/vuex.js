@@ -3,7 +3,7 @@ import { createStore } from 'vuex'
 const store = createStore({
     state() {
         return {
-            user: true,
+            user: null,
             seller: false,
         }
     },
@@ -22,7 +22,7 @@ const store = createStore({
     },
     mutations: {
         user(state, user) {
-            state.login = user;
+            state.user = user;
         },
     }
 });

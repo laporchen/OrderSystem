@@ -2,11 +2,29 @@ import datetime
 
 from model import *
 
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request,jsonify
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_cors import CORS
+import json
+import traceback
+
+keyLocation = './data/jwtKey.json'
+try:
+    f = open(keyLocation, 'r')
+    jwtKey = json.load(f)
+    f.close()
+except:
+    print('Error loading jwtKey.json,please make a new one')
+    exit()
 
 
 app = Flask(__name__)
+app.config.from_object(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1
+app.config['JWT_SECRET_KEY'] = jwtKey['key']
+CORS(app, resources={r'/*': {'origins': '*'}})
 
+jwt = JWTManager(app)
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -23,20 +41,20 @@ def register():
             Phone number
 
     '''
-    user = User(request.values.get('username'), request.values.get('password'), request.values.get(
-        'first_name'), request.values.get('last_name'), request.values.get('phone_number'), request.values.get('email'))
+    message = {"status": "fail"}
     if request.method == 'POST':
-
+        user = User(request.values.get('username'), request.values.get('password'), request.values.get(
+            'first_name'), request.values.get('last_name'), False, request.values.get('phone_number'))
+            
+        # real usage 
         if user.username is None:
             return "username already exist", 400
-        elif user.email == None:
-            return "email already exist", 400
 
-        if(request.form['isCustomer'] == True):
-            new_user = user
+        if(request.form['isSeller'] == True):
+            new_owner = user
             # some sql line to save user to the database
         else:
-            new_owner = user
+            new_user = user
             # some sql line to save owner to the database
     else:
         return "Invalid request", 400
@@ -53,22 +71,101 @@ def login():
             Password
 
     '''
-    '''
+    message = {"status": "fail"}
     if request.method == 'POST':
-        if username not exist:
-            return "username not exist", 400
-        else if email not exist:
+        post_data = request.get_json()
+        user = User(post_data["username"],"123456", None , None , None , None) # get user from sql
+        userExist = True # check username is in db
+        # test
+        if user.username != "Lapor":
+            message["message"] = "User does not exist"
+            return jsonify(message), 200
 
-        user = None  # some sql line to get user from the database
-        if(request.form['password'] == user.password):
-            return "login success", 200
+        if user.check_password(post_data["password"]):
+            message["message"] = "Login successful"
+            message["status"] = "success"
+            message['token'] = create_access_token(identity=user.username)
+            message['user'] = user.username
+            message['isSeller'] = False # check db
+            return jsonify(message), 200
         else:
-            return "wrong password", 401
-    else:
-        return "Invalid request", 400
-        '''
-    return "", 200
+            message["message"] = "Password incorrect"
+            return jsonify(message), 200
 
+
+        # real
+        if userExist == False:
+            message["message"] = "User does not exist"
+            return jsonify(message), 400
+
+        # some sql line to get user from the database
+        if user.checkPassword(request.form['password']):
+            message["message"] = "Login successful"
+            message["status"] = "success"
+            message['token'] = create_access_token(identity=user.username)
+            message['user'] = user.username
+            message['isSeller'] = False # check db
+            return jsonify(message), 200
+        else:
+            message["message"] = "Password incorrect"
+            return jsonify(message), 400
+
+    else:
+        message['message'] = "Invalid request"
+        return jsonify(message), 400
+
+@app.route('/api/getStores', methods=['POST'])
+@jwt_required()
+def getStores():
+    message = {"status": "fail"}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        search_filter = {} # get search filter from post_data
+        stores = []
+        for i in range(5): # tests ,real one will fetch from sql
+            st = Store(i,f"RAJ's {i} Store",f"Striver Road No.{i}",f"1234567{i}","",None, None)
+            st.rating = i+1
+            st.price_range[0] = i * 100 + 50
+            st.price_range[1] = i * 200 + 100
+            obj = {
+                "storeID": st.id,
+                "name": st.name,
+                "address": st.address,
+                "phone": st.phone_numbers,
+                "description": st.description,
+                "rating": st.rating,
+                "open_time": st.open_time,
+                "close_time": st.close_time,
+                "priceRange": st.price_range,
+            }
+            stores.append(obj)
+        message["stores"] = stores
+        message["status"] = "success"
+        return jsonify(message), 200
+    else:
+        message['message'] = "Invalid request"
+        return jsonify(message), 400
+    
+
+@app.route("/api/user", methods=['GET'])
+@jwt_required(optional=False)
+def returnUser():
+    global data
+    if request.method == 'GET':
+        try:
+            current_user = get_jwt_identity()
+            # check is seller or not
+            message = {"status": "success", "user": current_user}
+            return jsonify(message)
+        except Exception:
+            print(traceback.format_exc())
+            message = {"status": "failure",
+                       "message": "Error in getting user info"}
+            return jsonify(message)
+    else:
+        message = {"status": "failure",
+                   "message": "Invalid request"}
+        return jsonify(message)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=8081)

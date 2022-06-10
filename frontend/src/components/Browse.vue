@@ -12,7 +12,7 @@
                 <input v-model="minPrice" type=number placeholder="Min" style="width:50%">
                 <input v-model="maxPrice" type=number placeholder="Max" style="width:50%">
             </th>
-            <th style="width:20%" class="rateFilter">
+            <th style="width:20%" class="ratingFilter">
                 <span @click="minRating = 1"  :class="1 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
                 <span @click="minRating = 2"  :class="2 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
                 <span @click="minRating = 3"  :class="3 <= minRating ? 'checked' : ''"><i class="fa fa-star"/></span>
@@ -21,7 +21,7 @@
             </th>
         </table>
         <hr>
-        <template v-for="store in stores" :key="store">
+        <template v-for="store in stores" :key="store.storeID">
             <template v-if="filter(store.storeID)">
                 <table style="font-size:120% " @click="gotoStore(store.storeID)">
                     <tbody>
@@ -32,10 +32,10 @@
                             <td style="width:40%"><b>{{store.name}}</b></td>
                             <td style="width:35%">{{store.priceRange[0]}}$ ~ {{store.priceRange[1]}}$</td>
                             <td style="width:20%">
-                                <template v-for="n in store.rate" :key="n">
+                                <template v-for="n in store.rating" :key="n">
                                     <i class="fa fa-star checked"></i>
                                 </template>
-                                <template v-for="n in 5- store.rate" :key="n">
+                                <template v-for="n in 5- store.rating" :key="n">
                                     <i class="fa fa-star"></i>
                                 </template>
                             </td>
@@ -51,6 +51,7 @@
 
 <script>
 //import { mapGetters } from "vuex";
+import axios from "axios";
 export default {
 	name: "Browse",
 	data() {
@@ -74,7 +75,7 @@ export default {
             let storeName = store.name.toLowerCase();
             return  store.priceRange[0] >= this.minPrice && 
                     store.priceRange[1] <= this.maxPrice && 
-                    store.rate >= this.minRating && 
+                    store.rating >= this.minRating && 
                     storeName.includes(this.searchWord.toLowerCase()) &&
                     (this.favOnly === false || this.userFav(storeID));
         },
@@ -85,26 +86,21 @@ export default {
             //something that check the store is in user's favorite
             return storeID % 2 == 0;
         },
-        updateRate(val) {
+        updateRating(val) {
             this.minRating = val;
         },
-        checkRate(val) {
+        checkRating(val) {
             return this.minRating >= val;
         }
 	},
-	created() {
+	async created() {
         // fetching data here.
-        this.stores = [
-            {storeID:1,name:"Raj's Fast Food", address:"Striver Road 69",phone:"123456789",openTime:[["1000","1300"],["1900","0100"]],priceRange:[95,125],rate:4},
-            {storeID:2,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[595,1225],rate:5},
-            {storeID:3,name:"Crgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[295,1225],rate:2},
-            {storeID:4,name:"Corgi's Fisj", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[95,225],rate:3},
-            {storeID:5,name:"Corgi's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[5,12],rate:0},
-            {storeID:6,name:"Corgi's Fi", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[9,225],rate:1},
-            {storeID:7,name:"Corgi' Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[29,1225],rate:4},
-            {storeID:8,name:"Corg's Fist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[29,122],rate:3},
-            {storeID:9,name:"Corgist", address:"NTNU Rooftop",phone:"77777777",openTime:[["0100","2300"]],priceRange:[295,335],rate:3},
-        ]
+        let filter = {}; // filter rule
+        let res = await axios.post("getStores",filter);
+        if(res?.data?.status !== "success") {
+            this.$router.push("/404");
+        }
+        this.stores = res?.data?.stores;
 	},
 };
 </script>
@@ -123,7 +119,7 @@ tr:hover {
     background-color:lightgrey;
 }
 
-.rateFilter:hover {
+.ratingFilter:hover {
     cursor:pointer;
 }
 

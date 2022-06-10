@@ -3,36 +3,35 @@ from typing import List
 
 
 class User:
-    def __init__(self, username: str, password: str, email: str, first_name: str, last_name: str, is_admin: bool, phone_number: str):
+    def __init__(self, username: str, password: str,first_name: str, last_name: str, is_admin: bool, phone_number: str):
         self.username = username
         self.__password = password
-        self.__email = email
         self.__first_name = first_name
         self.__last_name = last_name
         self.is_admin = is_admin
         self.__phone_number = phone_number
 
     def __str__(self):
-        return f"{self.username} {self.__email} {self.__first_name} {self.__last_name}"
+        return f"{self.username} {self.__first_name} {self.__last_name}"
 
     def __repr__(self):
-        return f"{self.username} {self.__email} {self.__first_name} {self.__last_name}"
+        return f"{self.username} {self.__first_name} {self.__last_name}"
 
     def check_password(self, password):
         return self.__password == password
 
 
 class Customer(User):
-    def __init__(self, username: str, password: str, email: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
-        super().__init__(username, password, email,
+    def __init__(self, username: str, password: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
+        super().__init__(username, password,
                          first_name, last_name, False, phone_number)
         self.favorite_restaurants = []
         self.orders = []
 
 
 class Owner(User):
-    def __init__(self, username: str, password: str, email: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
-        super().__init__(username, password, email,
+    def __init__(self, username: str, password: str, first_name: str, last_name: str, phone_number: str):  # primary key is username
+        super().__init__(username, password,
                          first_name, last_name, False, phone_number)
         self.restaurant = None
 
@@ -62,24 +61,25 @@ class Menu:
         return f"{self.restaurant} {self.dishes}"
 
 
-class Restaurant:
-    def __init__(self, id: int, name: str, address: str, phone_numbers: str, description: str, menu: Menu, open_time: datetime.time, close_time: datetime.time):  # primary key is id
+class Store:
+    def __init__(self, id: int, name: str, address: str, phone_numbers: str, description: str, open_time: datetime.time, close_time: datetime.time):  # primary key is id
+        self.id = id
         self.name = name
-        self.adress = address
+        self.address = address
         self.phone_numbers = phone_numbers
         self.description = description
-        self.menu = menu
         self.orders = []
         self.rating = None
         self.number_of_ratings = 0
         self.open_time = open_time
         self.close_time = close_time
+        self.price_range = [0,10000]
 
     def __str__(self):
-        return f"{self.name} {self.address} {self.description} {self.menu}"
+        return f"{self.name} {self.address} {self.description}"
 
     def __repr__(self):
-        return f"{self.name} {self.adress} {self.description} {self.menu}"
+        return f"{self.name} {self.address} {self.description}"
 
 
 class Item:

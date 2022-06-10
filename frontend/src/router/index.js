@@ -54,11 +54,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  console.log(to);
   if(to.path === '/login' || to.path === '/register') {
     return;
   }
-  else if(store.getters.user == false){
+  else if(store.getters.user == null){
     router.push('/login');
   }
 })

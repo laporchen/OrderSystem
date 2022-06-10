@@ -19,6 +19,7 @@
                         <span v-for="n in 5 - order.rating" :key="n"><i class="fa fa-star"></i></span>
                     </template>
                 </div>
+                <br v-else>
                 <b :class="{ Completed: 'completed', Canceled: 'canceled', Preparing: 'preparing', Pending: 'pending' }[order.status]">
                             Order Status : {{order.status}}
                 </b>
