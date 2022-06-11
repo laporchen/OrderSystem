@@ -1,10 +1,10 @@
 import datetime
-from re import I, M
+
 
 from model.classes import *
 import model.sql as sql
 
-from flask import Flask, redirect, request,jsonify
+from flask import Flask,  request,jsonify
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_cors import CORS
 import json
@@ -30,6 +30,7 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 jwt = JWTManager(app)
 
+sql.main() # db cursor
 @app.route('/api/register', methods=['POST'])
 def register():
     print(request)
@@ -54,8 +55,8 @@ def register():
             message['message'] = "User already exist"
             return jsonify(message)
 
-        if(post_data["isSeller"]):
-            owner = Owner(post_data['username'], post_data['password'], post_data['first_name'], post_data['last_name'])
+        if post_data["isSeller"] == True:
+            owner = User(post_data['username'], post_data['password'], post_data['first_name'], post_data['last_name'],True)
             res = sql.insertSeller(owner)
             if(res == False):
                 message['message'] = "Failed to register"
@@ -65,7 +66,7 @@ def register():
                 message['message'] = "Register successfully"
                 return jsonify(message)
         else:
-            customer = Customer(post_data['username'], post_data['password'], post_data['first_name'], post_data['last_name'])
+            customer = User(post_data['username'], post_data['password'], post_data['first_name'], post_data['last_name'],False)
             res = sql.insertCustomer(customer)
             if(res == False):
                 message["message"] = "Failed to register"
@@ -92,41 +93,26 @@ def login():
     message = {"status": "fail"}
     if request.method == 'POST':
         post_data = request.get_json()
-        user = User(post_data["username"],"123456", None , None , None) # get user from sql
-        userExist = True # check username is in db
-        # test
-        if user.username != "Lapor":
-            message["message"] = "User does not exist"
-            return jsonify(message), 200
-
-        if user.check_password(post_data["password"]):
-            message["message"] = "Login successful"
-            message["status"] = "success"
-            message['token'] = create_access_token(identity=user.username)
-            message['user'] = user.username
-            message['isSeller'] = True# check db
-            return jsonify(message), 200
-        else:
-            message["message"] = "Password incorrect"
-            return jsonify(message), 200
-
-
-        # real
+        username = post_data["username"]
+        password = post_data["password"]
+        userExist = sql.userExist(username)# check username is in db
+        
         if userExist == False:
             message["message"] = "User does not exist"
-            return jsonify(message), 400
+            return jsonify(message), 200
 
+        user = sql.getUser(username)
         # some sql line to get user from the database
-        if user.checkPassword(request.form['password']):
+        if user.checkPassword(password):
             message["message"] = "Login successful"
             message["status"] = "success"
             message['token'] = create_access_token(identity=user.username)
             message['user'] = user.username
-            message['isSeller'] = False # check db
-            return jsonify(message), 200
+            message['isSeller'] = user.is_seller # check db
+            return jsonify(message), 200 
         else:
             message["message"] = "Password incorrect"
-            return jsonify(message), 400
+            return jsonify(message), 200
 
     else:
         message['message'] = "Invalid request"

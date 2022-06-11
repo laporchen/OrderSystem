@@ -5,34 +5,21 @@ from typing import List
 class User:
     def __init__(self, username: str, password: str,first_name: str, last_name: str, is_seller: bool):
         self.username = username
-        self.__password = password
-        self.__first_name = first_name
-        self.__last_name = last_name
+        self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
         self.is_seller = is_seller
 
     def __str__(self):
-        return f"{self.username} {self.__first_name} {self.__last_name}"
+        return f"{self.username} {self.first_name} {self.last_name}"
 
     def __repr__(self):
-        return f"{self.username} {self.__first_name} {self.__last_name}"
+        return f"{self.username} {self.first_name} {self.last_name}"
 
-    def check_password(self, password):
-        return self.__password == password
-
-
-class Customer(User):
-    def __init__(self, username: str, password: str, first_name: str, last_name: str):  # primary key is username
-        super().__init__(username, password,
-                         first_name, last_name, False)
-        self.favorite_restaurants = []
-        self.orders = []
+    def checkPassword(self, password):
+        return self.password == password
 
 
-class Owner(User):
-    def __init__(self, username: str, password: str, first_name: str, last_name: str):  # primary key is username
-        super().__init__(username, password,
-                         first_name, last_name, True)
-        self.restaurant = None
 
 
 class Order:

@@ -2,22 +2,27 @@ import pymysql
 from .classes import * 
 
 db_settings = {
-    "host": "127.0.0.1",
+    "host": "localhost",
     "port": 3306,
     "user": "root",
-    "password": "yourMOM",
+    "password": "12345678",
     "db": "OrderSystem",
     "charset": "utf8"
 }
 
 
+
 def main():
+    print("sql main")
     try:
+        global db
+        global cursor 
         db = pymysql.connect(**db_settings)
         cursor = db.cursor()
+        return cursor
     except Exception as e:
         print(e)
-        return False
+        return None 
 
 
 def createDataBase():
@@ -29,22 +34,83 @@ def createDataBase():
 
 
 def userExist(username):
-    result = True #some sql procedure to check if user exist
-    return result
-
-def insertUser(user: User):
+    global cursor
     try:
-        print("dummyy")
-        # some sql procedure to insert user
+        fetchUserFromCustomer = f"SELECT username FROM Customer where username = '{username}'"
+        fetchUserFromSeller = f"SELECT username FROM MERCHANT where username = '{username}'"
+        print(fetchUserFromCustomer)
+        print(fetchUserFromSeller)
+        cursor.execute(fetchUserFromCustomer)
+        if cursor.rowcount != 0:
+            return True 
+        cursor.execute(fetchUserFromSeller)
+        if cursor.rowcount != 0:
+            return True 
+
+        return False 
+
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+
+def userIsSeller(username):
+    global cursor
+    try:
+        fetchUserFromSeller = f"SELECT username FROM MERCHANT where username = '{username}'"
+        print(fetchUserFromSeller)
+        cursor.execute(fetchUserFromSeller)
+        return cursor.rowcount == 1
+
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+
+
+def getUser(username):
+    global cursor
+    try:
+        fetchUserFromCustomer = f"SELECT * FROM Customer where username = '{username}'"
+        fetchUserFromSeller = f"SELECT * FROM MERCHANT where username = '{username}'"
+        isSeller = userIsSeller(username)
+
+        if isSeller:
+            cursor.execute(fetchUserFromSeller)
+        else:
+            cursor.execute(fetchUserFromCustomer)
+            
+        userTuple = cursor.fetchone()
+        user = User(userTuple[0],userTuple[2],None,None,isSeller)
+        return user 
+
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+
+def insertCustomer(user: User):
+    global cursor
+    try:
+        name = user.first_name + " " + user.last_name
+        print("insert user " + name)
+        sql = f"INSERT INTO CUSTOMER VALUES ('{user.username}','{name}','{user.password}')"
+        print("Execute " + sql)
+        cursor.execute(sql)
+        db.commit()
+        print(f"user {user.username} inserted") 
         return True
     except Exception as e:
         print(e, "something went wrong")
         return False
 
-def insertSeller(seller: Owner):
+def insertSeller(seller: User):
+    global cursor
     try:
-        print("dummyy")
-        # some sql procedure to insert seller 
+        name = seller.first_name + " " + seller.last_name
+        print("insert user " + name)
+        sql = f"INSERT INTO MERCHANT VALUES ('{seller.username}','{name}','{seller.password}')"
+        print("Execute " + sql)
+        cursor.execute(sql)
+        db.commit()
+        print(f"seller {seller.username} inserted") 
         return True
     except Exception as e:
         print(e, "something went wrong")

@@ -73,24 +73,17 @@ export default {
 			password: "",
 			password_confirmation: "",
 			isSeller: false,
-			user: {
-				first_name: "",
-				last_name: "",
-				email: "",
-				password: "",
-				password_confirmation: "",
-			},
 		};
 	},
 	methods: {
 		async handleSubmit(e) {
 			e.preventDefault();
 			const newUser = {
+				username: this.username,
 				first_name: this.first_name,
 				last_name: this.last_name,
-				email: this.email,
 				password: this.password,
-				tasks: [],
+				isSeller: this.isSeller
 			};
 			if (newUser.password !== this.password_confirmation) {
 				alert("Passwords do not match");
@@ -98,8 +91,9 @@ export default {
 			}
 			let response = await axios.post("register", newUser);
 			if (response?.data?.status !== "success") {
-				console.log(response);
+				alert("Register failed!")
 			} else {
+				alert("Register successed!")
 				this.$router.push("/login");
 			}
 		},
