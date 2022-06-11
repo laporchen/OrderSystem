@@ -14,6 +14,7 @@
                         <span class="fa fa-star"></span>
                     </template>
                 </th>
+                <th style="width:10% font:120%" @click="userFav = !userFav" :class="{fav:userFav}"><span class="fa fa-heart"></span></th>
             </thead>
         </table>
 
@@ -73,6 +74,7 @@ export default {
             storeItems : [],
             storeID : null,
             currentTotal : 0,
+            userFav : false,
             userCart : {},
             cartHasItem : false
 		};

@@ -158,7 +158,8 @@ def returnUser():
         try:
             current_user = get_jwt_identity()
             # check is seller or not
-            message = {"status": "success", "user": current_user,"isSeller": True}
+            user = sql.getUser(current_user)
+            message = {"status": "success", "user": user.username,"isSeller": user.is_seller}
             return jsonify(message)
         except Exception:
             print(traceback.format_exc())
@@ -248,6 +249,21 @@ def updateStoreOrder():
         message["status"] = "success"
         message["message"] = "Order updated"
         return jsonify(message)
+
+
+@app.route("/api/userFavStoreUpdate",method=["POST"])
+@jwt_required()
+def userFavStoreUpdate():
+    post_data = request.get.json()
+    uid = post_data["username"]
+    sid = post_data["storeID"]
+    res = sql.updateFav(uid,sid) 
+    if res == True:
+        message = {"status":"success"}
+        return jsonify(message)
+    message = {"status":"failed"}
+    return jsonify(message)
+    
 
 if __name__ == '__main__':
     app.run(debug=True,port=8081)

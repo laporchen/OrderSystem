@@ -167,3 +167,21 @@ def updateStoreOrder(sid, oid, status):
 def getUserOders(uid):
     # some sql procedure to get user orders
     return []
+
+def updateFav(uid,sid):
+    global cursor
+    try:
+        sql = f"SELECT * FROM FAVORTIE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
+        cursor.execute(sql)
+        if cursor.rowcount == 1:
+            sql = f"DELETE FROM FAVORTIE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
+            cursor.execute(sql)
+        else:
+            sql = f"INSERT INTO FAVORITE VALUES('{uid}',{sid})"
+            cursor.execute(sql)
+        db.commit()
+
+        return True
+    except Exception as e:
+        print(e, "something went wrong")
+        return False

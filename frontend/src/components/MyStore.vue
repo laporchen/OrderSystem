@@ -1,7 +1,35 @@
 <template>
     <div id="myStore">
         <h3><input class="editBox" type="text" placeholder="Store Name" v-model="storeName"></h3>
-        <h5><input class="editBox" type="text" placeholder="Address Number" v-model="storeAddress"></h5>
+        <div style="display:table">
+            <div style="display:table-cell">
+                <input class="editBox" type="text" placeholder="City" v-model="storeAddress.city">
+            </div>
+            <div style="display:table-cell">
+                <input class="editBox" type="text" placeholder="District" v-model="storeAddress.district">
+            </div>
+            <div style="display:table-cell">
+                <input class="editBox" type="text" placeholder="Road" v-model="storeAddress.road">
+            </div>
+            <div style="display:table-cell">
+                <input class="editBox" type="text" placeholder="Lane" v-model="storeAddress.lane">
+            </div>
+            <div style="display:table-cell">
+                <input class="editBox" type="text" placeholder="Alley" v-model="storeAddress.alley">
+            </div>
+            <div style="display:table-cell">
+                <input class="editBox" type="number" placeholder="No" v-model="storeAddress.no">
+            </div>
+            <div style="display:table-cell">
+                <label>號</label>
+            </div>
+            <div style="display:table-cell">
+                <input class="editBox" type="number" placeholder="Floor" v-model="storeAddress.floor">
+            </div>
+            <div style="display:table-cell">
+                <label>樓</label>
+            </div>
+        </div>
         <h5><input type="tel" placeholder="Phone Number" v-model="storePhone"></h5>
         <table>
             <thead>
@@ -50,7 +78,15 @@ export default {
 		return {
             storeName : null,
             storePhone : null,
-            storeAddress : null,
+            storeAddress : {
+                city: "",
+                district:"" ,
+                road:"" ,
+                lane:"" ,
+                alley:"",
+                no:"",
+                floor:"",
+            },
             storeRating : 0,
             storeItems : [],
             storeID : null,

@@ -9,7 +9,7 @@
                 <input type="text" placeholder="Search" v-model="searchWord">
             </th>
             <th style="width:35%">
-                <input v-model="minPrice" type=number placeholder="Min" style="width:50%">
+                <input v-model="minPrice" ype=number placeholder="Min" style="width:50%">
                 <input v-model="maxPrice" type=number placeholder="Max" style="width:50%">
             </th>
             <th style="width:20%" class="ratingFilter">

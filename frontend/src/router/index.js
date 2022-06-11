@@ -61,7 +61,7 @@ router.beforeEach((to) => {
     router.push('/login');
   }
   const sellerPath = ["/myStore", "/myOrders","/setting"];
-  const userPath = ["/browse", "/cart", "/orders", "/favorite","store/:storeName","/"];
+  const userPath = ["/browse", "/cart", "/orders", "/favorite","/store","/"];
 
   if(store.getters.seller === true) {
     if(sellerPath.includes(to.path)) {
@@ -72,7 +72,7 @@ router.beforeEach((to) => {
     }
   }
   else {
-    if(userPath.includes(to.path)) {
+    if(userPath.includes(to.path) || to.path.match(/\/store\/*/)) {
       return;
     }
     else {
