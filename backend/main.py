@@ -1,7 +1,8 @@
 import datetime
 from re import I, M
 
-from model import *
+from model.classes import *
+import model.sql as sql
 
 from flask import Flask, redirect, request,jsonify
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
@@ -91,7 +92,7 @@ def login():
     message = {"status": "fail"}
     if request.method == 'POST':
         post_data = request.get_json()
-        user = User(post_data["username"],"123456", None , None , None , None) # get user from sql
+        user = User(post_data["username"],"123456", None , None , None) # get user from sql
         userExist = True # check username is in db
         # test
         if user.username != "Lapor":
@@ -103,7 +104,7 @@ def login():
             message["status"] = "success"
             message['token'] = create_access_token(identity=user.username)
             message['user'] = user.username
-            message['isSeller'] = False # check db
+            message['isSeller'] = True# check db
             return jsonify(message), 200
         else:
             message["message"] = "Password incorrect"
@@ -137,8 +138,8 @@ def getStores():
     message = {"status": "fail"}
     if request.method == 'POST':
         post_data = request.get_json()
-        search_filter = {} # get search filter from post_data
-        stores = []
+        search_filter = {}# get search filter from post_data
+        stores = sql.getStores(search_filter) 
         for i in range(5): # tests ,real one will fetch from sql
             st = Store(i,f"RAJ's {i} Store",f"Striver Road No.{i}",f"1234567{i}","",None, None)
             st.rating = i+1
@@ -165,14 +166,13 @@ def getStores():
     
 
 @app.route("/api/user", methods=['GET'])
-@jwt_required(optional=False)
+@jwt_required()
 def returnUser():
-    global data
     if request.method == 'GET':
         try:
             current_user = get_jwt_identity()
             # check is seller or not
-            message = {"status": "success", "user": current_user}
+            message = {"status": "success", "user": current_user,"isSeller": True}
             return jsonify(message)
         except Exception:
             print(traceback.format_exc())
@@ -182,6 +182,85 @@ def returnUser():
     else:
         message = {"status": "failure",
                    "message": "Invalid request"}
+        return jsonify(message)
+
+@app.route("/api/store", methods=['POST'])
+@jwt_required()
+def returnStore():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        print(post_data)
+        sid = -1
+        uid = post_data["userID"]
+        if post_data["isSeller"] == False:
+            sid = post_data["storeID"]
+            cart = sql.getUserCart(sid, post_data["username"])
+            message["cart"] = cart
+        else:
+            sid = sql.getUserStore(uid)
+        store = sql.getStoreInfo(sid)
+        # need to check userid is the owner of storeid if user is seller
+        message = {"status": "success"}
+        message["store"] = store
+        return jsonify(message)
+    else:
+        message = {"status": "failure",
+                   "message": "Invalid request"}
+        return jsonify(message)
+
+@app.route("/api/updateStore", methods=['POST'])
+@jwt_required()
+def updateStore():
+    if request.method == 'POST':
+        message = {"status": "failed"}
+        post_data = request.get_json()
+        if post_data["isSeller"] == False:
+            message["message"] = "You are not a seller"
+            return jsonify(message), 400
+        sid = post_data["storeID"]
+        status = sql.updateStore(sid, post_data["store"])
+        if status == False:
+            message["message"] = "Failed to update store"
+            return jsonify(message), 400
+        message["status"] = "success"
+        message["message"] = "Store updated"
+        return jsonify(message)
+
+@app.route("/api/getStoreOrders", methods=['POST'])
+@jwt_required()
+def getStoreOrders():
+    if request.method == 'POST':
+        message = {"status": "failed"}
+        post_data = request.get_json()
+        if post_data["isSeller"] == False:
+            message["message"] = "You are not a seller"
+            return jsonify(message), 400
+        sid = sql.getUserStore(post_data["userID"])
+        storeOrders = sql.getStoreOrders(sid)
+        message["message"] = "Store orders"
+        message["status"] = "success"
+        message["orders"] = storeOrders
+        return jsonify(message)
+    
+
+@app.route("/api/updateStoreOrder", methods=['POST'])
+@jwt_required()
+def updateStoreOrder():
+    if request.method == 'POST':
+        post_data = request.get_json()
+        message = {"status": "failed"}
+        if post_data["isSeller"] == False:
+            message["message"] = "You are not a seller"
+            return jsonify(message), 400
+        sid = sql.getUserStore(post_data["userID"])
+        oid = post_data["orderID"]
+        new_status = post_data["newStatus"]
+        status = sql.updateStoreOrder(sid,oid, new_status)
+        if status == False:
+            message["message"] = "Failed to update order"
+            return jsonify(message), 400
+        message["status"] = "success"
+        message["message"] = "Order updated"
         return jsonify(message)
 
 if __name__ == '__main__':

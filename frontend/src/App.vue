@@ -26,7 +26,13 @@ export default {
 			this.$router.push("/login");
 		} else {
 			await this.$store.dispatch("user", response?.data);
-			this.$router.push("/browse");
+			await this.$store.dispatch("seller", response?.data.isSeller);
+			if(response.data.isSeller) {
+				this.$router.push("/myStore");
+			}
+			else {
+				this.$router.push("/browse");
+			}
 		}
 	},
 };

@@ -3,7 +3,7 @@ import { createStore } from 'vuex'
 const store = createStore({
     state() {
         return {
-            user: true,
+            user: null,
             seller: false,
         }
     },
@@ -19,11 +19,17 @@ const store = createStore({
         user(context, user) {
             context.commit('user', user)
         },
+        seller(context,seller) {
+            context.commit('seller', seller)
+        }
     },
     mutations: {
         user(state, user) {
             state.user = user;
         },
+        seller(state, seller) {
+            state.seller = seller;
+        }
     }
 });
 

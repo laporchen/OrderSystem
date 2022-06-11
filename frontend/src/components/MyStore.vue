@@ -8,11 +8,8 @@
                 <th style="width:15%"></th>
                 <th style="width:60%"></th>
                 <th style="width:15%">
-                    <template v-for="n in storeRating" :key="n">
-                        <span class="fa fa-star checked"></span>
-                    </template>
-                    <template v-for="n in 5 - storeRating" :key="n">
-                        <span class="fa fa-star"></span>
+                    <template v-for="n in 5" :key="n">
+                        <span :class="{checked:(n<=storeRating)}" class="fa fa-star"></span>
                     </template>
                 </th>
             </thead>
@@ -46,7 +43,7 @@
 </template>
 
 <script>
-//import { mapGetters } from "vuex";
+import axios from "axios";
 export default {
 	name: "Store",
 	data() {
@@ -58,47 +55,106 @@ export default {
             storeItems : [],
             storeID : null,
             itemIDcounter : 1,
+            oldItem : [],
+            delItemID : [],
+            modifyItem : [],
+            newItem : [],
 		};
 	},
 	methods: {
         addNew() {
             this.storeItems.push({
-                id : this.itemIDcounter,
+                id : this.IDcounter,
                 name : "",
                 price : 0,
                 sales : 0
             });
-            this.itemIDcounter++;
+            this.IDcounter++;
         },
         delItem(index) {
             this.storeItems.splice(index, 1);
         },
         async saveChange() {
+
+            this.storeItems.forEach((item) => {
+                let contain = this.oldItem.some((oldItem) => {
+                    return oldItem.id == item.id;
+                });
+                let modify = this.oldItem.some((oldItem)=> {
+                    return oldItem.id == item.id && (oldItem.name != item.name || oldItem.price != item.price);
+                });
+                if(!contain) {
+                    this.newItem.push(item);
+                }
+                else if(modify) {
+                    this.modifyItem.push(item);
+                }
+            })
+            this.oldItem.forEach((item) => {
+                let contain = this.storeItems.some((storeItem) => {
+                    return storeItem.id == item.id;
+                });
+                if(!contain) {
+                    this.delItemID.push(item.id);
+                }
+            })
             for(let i = 0; i < this.storeItems.length; i++) {
                 if(this.storeItems[i].name == "") {
                     this.storeItems.splice(i, 1);
                     i--;
                 }
             }
+
             // fire event to backend
+            let response = await axios.post("/updateStore", {
+                isSeller : this.$store.state.seller,
+                userID : this.$store.getters.user,
+                storeID : this.storeID,
+                store : {
+                    storeName : this.storeName,
+                    storeAddress : this.storeAddress,
+                    storePhone : this.storePhone,
+                    newItem : this.newItem,
+                    delItemID : this.delItemID,
+                    modifyItem : this.modifyItem,
+                }
+            });       
+            if(response?.data?.status != "success") {
+                alert("Error : Cannot update your store, please try again later");
+            }
+            else {
+                this.oldItem = JSON.parse(JSON.stringify(this.storeItems));
+                this.newItem = []
+                this.delItemID = [];
+                this.modifyItem = [];
+                alert("Success : Your store has been updated");
+            }
             // if failed then give an error message to user
         }
 	},
-	created() {
+	async created() {
         // fetching store data here.
         // if store does not exist , redirect to home page
         //feteched data is assigned to the page here
-        this.storeName = "Raj's Fast Food";
-        this.storeID = 1;
-        this.storePhone = "093112651";
-        this.storeAddress = "106台北市大安區和平東路一段162號";
-        this.storeRating = 4;
-        this.storeItems = [ 
-           {id:1, name:"Striver Food",price:32,sales:87},
-           {id:2, name:"Striver Combo",price:100,sales:0},
-        ]
+        let response = await axios.post("/store", {
+            isSeller : this.$store.state.seller,
+            userID : this.$store.getters.user,
+        });
+        console.log(response.data.store);
+        if(response?.data?.status != "success") {
+            this.$router.push("/");
+        }
+        let storeInfo = response.data.store;
+        this.storeName = storeInfo.storeName;
+        this.storeID = storeInfo.storeID;
+        this.storePhone = storeInfo.storePhone;
+        this.storeAddress = storeInfo.storeAddress;
+        this.storeRating = storeInfo.storeRating;
+        this.storeItems = storeInfo.storeItems;
+        this.itemIDcounter = storeInfo.IDcounter;
+        this.oldItem = JSON.parse(JSON.stringify(storeInfo.storeItems));
 	},
-    beforeUnmount() {
+    async beforeUnmount() {
     }
 };
 </script>

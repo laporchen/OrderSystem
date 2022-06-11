@@ -60,6 +60,25 @@ router.beforeEach((to) => {
   else if(store.getters.user == null){
     router.push('/login');
   }
+  const sellerPath = ["/myStore", "/myOrders","/setting"];
+  const userPath = ["/browse", "/cart", "/orders", "/favorite","store/:storeName","/"];
+
+  if(store.getters.seller === true) {
+    if(sellerPath.includes(to.path)) {
+      return;
+    }
+    else {
+      router.push('/myStore');
+    }
+  }
+  else {
+    if(userPath.includes(to.path)) {
+      return;
+    }
+    else {
+      router.push('/browse');
+    }
+  }
 })
 
 export default router

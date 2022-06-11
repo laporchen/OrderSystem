@@ -38,16 +38,12 @@
 
 <script>
 //import { mapGetters } from "vuex";
+import axios from "axios";
 export default {
 	name: "OrderPage",
 	data() {
 		return {
-            orders : [
-                {orderNumber:1,orderDate:"2022/05/19",user:"Striver",orderItems : [{id: 32,name:"Striver Special",quantity : 1}, {id : 31,name:"Raj Cola", quantity: 69}],time:"2022-06-04 13:32",status : "Pending"},
-                {orderNumber:2,orderDate:"2022/05/19",user:"Raj",orderItems : [{id: 32,name:"Striver Special",quantity : 5}],time:"2022-06-04 13:32",status : "Completed"},
-                {orderNumber:4,orderDate:"2022/05/19",user:"Ra",orderItems : [{id: 32,name:"Striver Special",quantity : 5}],time:"2022-06-04 13:32",status : "Pending"},
-                {orderNumber:3,orderDate:"2022/05/19",user:"Rj",orderItems : [{id: 32,name:"Striver Special",quantity : 5}],time:"2022-06-04 13:32",status : "Preparing"},
-            ]
+            orders : []
 		};
 	},
 	methods: {
@@ -60,20 +56,57 @@ export default {
             return sum;
         },
         async completeOrder(index,orderID) {
+            let res = await axios.post("/updateStoreOrder",{
+                userID : this.$store.state.user,
+                isSeller : this.$store.state.seller,
+                orderID : orderID,
+                newStatus : "Completed"
+            });
+            if(res.data?.status !== "success") {
+                alert("Error");
+                return;
+            }
             this.orders[index].status = "Completed";
-            console.log(index,orderID);
         },
         async cancelOrder(index,orderID) {
+            let res = await axios.post("/updateStoreOrder",{
+                userID : this.$store.state.user,
+                isSeller : this.$store.state.seller,
+                orderID : orderID,
+                newStatus : "Canceled"
+            });
+            if(res.data?.status !== "success") {
+                alert("Error");
+                return;
+            }
             this.orders[index].status = "Canceled";
-            console.log(index,orderID);
         },
         async confirmOrder(index,orderID) {
+            let res = await axios.post("/updateStoreOrder",{
+                userID : this.$store.state.user,
+                isSeller : this.$store.state.seller,
+                orderID : orderID,
+                newStatus : "Preparing"
+            });
+            if(res.data?.status !== "success") {
+                alert("Error");
+                return;
+            }
             this.orders[index].status = "Preparing";
-            console.log(index,orderID);
         },
 	},
-	created() {
+	async created() {
         // something to fetch user order data from backend.
+        let response = await axios.post("/getStoreOrders",{
+            userID : this.$store.state.user,
+            isSeller : this.$store.state.seller
+        });
+        if(response?.data?.status === "success") {
+            this.orders = response.data.orders;
+        }
+        else {
+            this.$router.push("/");
+        }
 	},
 };
 </script>
