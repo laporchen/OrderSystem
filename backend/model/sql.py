@@ -105,9 +105,15 @@ def insertSeller(seller: User):
     global cursor
     try:
         name = seller.first_name + " " + seller.last_name
-        print("insert user " + name)
-        sql = f"INSERT INTO MERCHANT VALUES ('{seller.username}','{name}','{seller.password}')"
+        sql = f"INSERT INTO MERCHANT VALUES ('{seller.username}','{seller.username} store','{seller.password}')"
         print("Execute " + sql)
+        cursor.execute(sql)
+        sql = f"INSERT INTO SHOP (mer_uname,name,rate,openTime,closeTime) VALUES('{seller.username}','{name}',3,'00:00:00','12:00:00')"
+        cursor.execute(sql)
+        sql = f"SELECT ID FROM SHOP WHERE mer_uname = '{seller.username}'"
+        cursor.execute(sql)
+        shop_id = cursor.fetchone()[0] 
+        sql = f"INSERT INTO ADDRESS VALUES({shop_id},'test city','mock district', 'raj road', '{shop_id} lane','some alley', {shop_id},1)"
         cursor.execute(sql)
         db.commit()
         print(f"seller {seller.username} inserted") 
@@ -122,6 +128,25 @@ def getUserStore(uid):
 
 def getStores(filter):
     # some sql procedure to get stores
+    global cursor
+    try:
+        sql = "SELECT * FROM SHOP" # some precedure that can get shopID,shopName,shopAddress,minPrice,maxPrice,rating
+        cursor.execute(sql)
+        fetched_shops = cursor.fetchall()
+        shops = [] 
+        for shop in  fetched_shops:
+            shops.append({
+                "storeID":shop[0],
+                "name":shop[2],
+                "priceRange": [0,1002],
+                "rating":3
+            })
+
+        return shops 
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+    
     return [] 
 
 def getStoreInfo(sid):
@@ -171,14 +196,28 @@ def getUserOders(uid):
 def updateFav(uid,sid):
     global cursor
     try:
-        sql = f"SELECT * FROM FAVORTIE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
+        sql = f"SELECT * FROM FAVORITE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
         cursor.execute(sql)
         if cursor.rowcount == 1:
-            sql = f"DELETE FROM FAVORTIE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
+            sql = f"DELETE FROM FAVORITE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
             cursor.execute(sql)
         else:
             sql = f"INSERT INTO FAVORITE VALUES('{uid}',{sid})"
             cursor.execute(sql)
+        db.commit()
+
+        return True
+    except Exception as e:
+        print(e, "something went wrong")
+        return False
+
+def changeUserPassword(uid, npw):
+    global cursor
+    try:
+        sql = f"UPDATE MERCHANT SET password = '{npw}' WHERE username = '{uid}'"
+        cursor.execute(sql)
+        sql = f"UPDATE CUSTOMER SET password = '{npw}' WHERE username = '{uid}'"
+        cursor.execute(sql)
         db.commit()
 
         return True

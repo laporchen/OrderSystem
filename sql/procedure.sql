@@ -48,9 +48,9 @@ CREATE PROCEDURE insertShop (
         DECLARE shopID INT DEFAULT 0;
         INSERT INTO shop
         VALUES (0, mer_uname, name, openTime, closeTime, phone, email, 3);
-        SELECT ID INTO shopID
+        SELECT ID AS shopID 
         FROM shop
-        WHERE name = shop.name;
+        WHERE shop.ID = shopID;
         INSERT INTO address
         VALUES (shopID, city, district, road, lane, alley, no, floor);
     END //
@@ -125,7 +125,7 @@ READS SQL DATA
     END //
 CREATE FUNCTION isMerchant (uname VARCHAR(20))
 RETURNS BOOL
-READ SQL DATA
+READS SQL DATA
     BEGIN
         DECLARE ret BOOL DEFAULT TRUE;
         SELECT EXISTS (

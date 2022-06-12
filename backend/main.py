@@ -1,4 +1,5 @@
 import datetime
+from email import message
 
 
 from model.classes import *
@@ -119,30 +120,12 @@ def login():
         return jsonify(message), 400
 
 @app.route('/api/getStores', methods=['POST'])
-@jwt_required()
 def getStores():
     message = {"status": "fail"}
     if request.method == 'POST':
         post_data = request.get_json()
-        search_filter = {}# get search filter from post_data
+        search_filter = post_data# get search filter from post_data
         stores = sql.getStores(search_filter) 
-        for i in range(5): # tests ,real one will fetch from sql
-            st = Store(i,f"RAJ's {i} Store",f"Striver Road No.{i}",f"1234567{i}","",None, None)
-            st.rating = i+1
-            st.price_range[0] = i * 100 + 50
-            st.price_range[1] = i * 200 + 100
-            obj = {
-                "storeID": st.id,
-                "name": st.name,
-                "address": st.address,
-                "phone": st.phone_numbers,
-                "description": st.description,
-                "rating": st.rating,
-                "open_time": st.open_time,
-                "close_time": st.close_time,
-                "priceRange": st.price_range,
-            }
-            stores.append(obj)
         message["stores"] = stores
         message["status"] = "success"
         return jsonify(message), 200
@@ -251,19 +234,51 @@ def updateStoreOrder():
         return jsonify(message)
 
 
-@app.route("/api/userFavStoreUpdate",method=["POST"])
+@app.route("/api/userFavStoreUpdate",methods=["POST"])
 @jwt_required()
 def userFavStoreUpdate():
-    post_data = request.get.json()
-    uid = post_data["username"]
-    sid = post_data["storeID"]
-    res = sql.updateFav(uid,sid) 
-    if res == True:
-        message = {"status":"success"}
+    if request.method == "POST":
+        post_data = request.get_json()
+        uid = post_data["username"]
+        sid = post_data["storeID"]
+        res = sql.updateFav(uid,sid) 
+        if res == True:
+            message = {"status":"success"}
+            return jsonify(message)
+        message = {"status":"failed"}
         return jsonify(message)
-    message = {"status":"failed"}
-    return jsonify(message)
     
+
+@app.route("/api/changePassword",methods=["POST"])
+@jwt_required()
+def changePassword():
+    if request.method == "POST":
+        pd = request.get_json()
+        username = pd["username"]
+        npw = pd["newPassword"]
+        opw = pd["oldPassword"]
+        if npw != pd["confirmPassword"]:
+            message = {"status":"failed","message" : "New password does not match"}
+            return jsonify(message), 200
+        user = sql.getUser(username)
+        
+        if user == False:
+            message = {"status":"failed","message" : "User does not exist"}
+            return jsonify(message), 400
+        
+        if user.checkPassword(opw) == False:
+            message = {"status":"failed","message" : "Old password does not match"}
+            return jsonify(message), 200
+        
+        if sql.changeUserPassword(username,npw) == True:
+            message = {"status":"success","message" : "Password has been updated"}
+            return jsonify(message), 200
+
+        message = {"status":"failed","message" : "Password did not change"}
+        return jsonify(message), 200
+
+    else:
+        return "Invalid request", 400
 
 if __name__ == '__main__':
     app.run(debug=True,port=8081)
