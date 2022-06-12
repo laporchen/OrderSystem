@@ -34,7 +34,7 @@ def insertUser():
         lastName = ''.join(random.choices(string.ascii_uppercase + string.digits, k = S - 2)) 
         password = ''.join(random.choices(string.ascii_uppercase + string.digits, k = S- 5)) 
         name = firstName + " " + lastName
-        sql = f"INSERT INTO CUSTOMER VALUES ('{username}','{name}','{password}')"
+        sql = f"insertCustomer('{username}', '{name}', '{password}')"
         cursor.execute(sql)
 
     db.commit()
@@ -47,7 +47,7 @@ def insertSeller():
         lastName = ''.join(random.choices(string.ascii_uppercase + string.digits, k = S - 2)) 
         password = ''.join(random.choices(string.ascii_uppercase + string.digits, k = S- 5)) 
         name = firstName + " " + lastName
-        sql = f"INSERT INTO MERCHANT VALUES ('{username}','{name}','{password}')"
+        sql = f"insertMerchant('{username}','{name}','{password}')"
         cursor.execute(sql)
 
     db.commit()
