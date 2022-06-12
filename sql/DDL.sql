@@ -75,14 +75,14 @@ CREATE TABLE item (
 );
 CREATE TABLE contain (
     order_id INT UNSIGNED,
-    item_id INT UNSIGNED,
     shop_id INT UNSIGNED,
+    item_id INT UNSIGNED,
     number TINYINT UNSIGNED,
-    PRIMARY KEY(order_id, item_id, shop_id),
+    PRIMARY KEY(order_id, shop_id, item_id),
     FOREIGN KEY (order_id) REFERENCES orders(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (item_id, shop_id) REFERENCES item(ID, shop_id)
+    FOREIGN KEY (shop_id, item_id) REFERENCES item(shop_id, ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );

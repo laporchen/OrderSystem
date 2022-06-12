@@ -47,7 +47,7 @@ CREATE PROCEDURE insertShop (
     BEGIN
         DECLARE shopID INT DEFAULT 0;
         INSERT INTO shop
-        VALUES (0, mer_uname, name, openTime, closeTime, phone, email, 0);
+        VALUES (0, mer_uname, name, openTime, closeTime, phone, email, 3);
         SELECT ID INTO shopID
         FROM shop
         WHERE name = shop.name;
@@ -73,16 +73,16 @@ CREATE PROCEDURE insertItem (
     END //
 CREATE PROCEDURE insertFav (
     IN cus_uname VARCHAR(20),
-    IN shop_id INT,
+    IN shop_id INT
 )
     BEGIN
-        INSERT INTO
+        INSERT INTO favorite
         VALUES (cus_uname, shop_id);
     END //
 CREATE PROCEDURE insertOrder (
     IN cus_uname VARCHAR(20),
     IN total INT,
-    OUT order_id INT,
+    OUT order_id INT
 )
     BEGIN
         DECLARE nowDateTime DATETIME;
@@ -95,14 +95,34 @@ CREATE PROCEDURE insertOrder (
     END //
 CREATE PROCEDURE setContainItem (
     IN order_id INT,
-    IN item_id INT,
     IN shop_id INT,
-    In number TINYINT,
+    IN item_id INT,
+    In number TINYINT
 )
     BEGIN
         INSERT INTO contain
-        VALUES (order_id, item_id, shop_id, number);
+        VALUES (order_id, shop_id, item_id, number);
     END //
+CREATE FUNCTION checkUsernameAvail (uname VARCHAR(20))
+RETURNS BOOL
+READS SQL DATA
+        BEGIN
+            DECLARE ret BOOL DEFAULT TRUE;
+            SELECT NOT EXISTS(
+                SELECT username
+                FROM customer
+                WHERE username = uname
+                UNION
+                SELECT username
+                FROM merchant
+                WHERE username = uname
+                UNION 
+                SELECT username
+                FROM admin
+                WHERE username = uname
+            ) INTO ret;
+            RETURN ret;
+        END //
 CREATE PROCEDURE searchShop (
     IN cus_name VARCHAR(20),
     IN fav BOOL, IN name VARCHAR(40),
