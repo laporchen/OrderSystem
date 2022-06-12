@@ -1,6 +1,6 @@
--- DELIMITER //
+-- ALL PROCEDURES HAVE BEEN TESTED.
 
---ALL PROCEDURES HAVE BEEN TESTED.
+DELIMITER //
 
 CREATE PROCEDURE insertCustomer(
     IN username VARCHAR(20),
@@ -215,7 +215,7 @@ CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
         END IF; 
     END //
 
--- DELIMITER ;
+DELIMITER ;
 
---TODO
---checkUserExist
+-- TODO
+-- checkUserExist
