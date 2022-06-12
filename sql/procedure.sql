@@ -1,6 +1,6 @@
 -- DELIMITER //
 
---Some procedure are not test yet!
+--ALL PROCEDURES HAVE BEEN TESTED.
 
 CREATE PROCEDURE insertCustomer(
     IN username VARCHAR(20),
@@ -106,43 +106,93 @@ CREATE PROCEDURE setContainItem (
 CREATE FUNCTION checkUsernameAvail (uname VARCHAR(20))
 RETURNS BOOL
 READS SQL DATA
-        BEGIN
-            DECLARE ret BOOL DEFAULT TRUE;
-            SELECT NOT EXISTS(
-                SELECT username
-                FROM customer
-                WHERE username = uname
-                UNION
-                SELECT username
-                FROM merchant
-                WHERE username = uname
-                UNION 
-                SELECT username
-                FROM admin
-                WHERE username = uname
-            ) INTO ret;
-            RETURN ret;
-        END //
-CREATE PROCEDURE searchShop (
-    IN cus_name VARCHAR(20),
-    IN fav BOOL, IN name VARCHAR(40),
-    IN lowerBound INT,
-    In upperBound INT,
-    IN rate INT
+    BEGIN
+        DECLARE ret BOOL DEFAULT TRUE;
+        SELECT NOT EXISTS(
+            SELECT username
+            FROM customer
+            WHERE username = uname
+            UNION
+            SELECT username
+            FROM merchant
+            WHERE username = uname
+            UNION 
+            SELECT username
+            FROM admin
+            WHERE username = uname
+        ) INTO ret;
+        RETURN ret;
+    END //
+CREATE FUNCTION isMerchant (uname VARCHAR(20))
+RETURNS BOOL
+READ SQL DATA
+    BEGIN
+        DECLARE ret BOOL DEFAULT TRUE;
+        SELECT EXISTS (
+            SELECT username
+            FROM merchant
+            WHERE username = uname
+        ) INTO ret;
+        RETURN ret;
+    END //
+CREATE PROCEDURE getUser (IN uname VARCHAR(20))
+    BEGIN
+        SELECT *
+        FROM customer
+        WHERE uname = username
+        UNION
+        SELECT *
+        FROM merchant
+        WHERE uname = username;
+    END //
+CREATE PROCEDURE getShopByUname (IN uname VARCHAR(20))
+    BEGIN
+        SELECT *
+        FROM shop
+        WHERE mer_uname = uname;
+    END;
+CREATE PROCEDURE getShopByID (IN ID INT)
+    BEGIN
+        SELECT *
+        FROM shop
+        WHERE shop.ID = ID;
+    END;
+CREATE PROCEDURE updateFav (
+    IN uname VARCHAR(20),
+    IN shop_id INT
 )
     BEGIN
-        CREATE TEMPORARY TABLE ret (
-            fav BOOL,
-            shop_name VARCHAR(40) PRIMARY KEY,
-            lowerBound INT UNSIGNED,
-            upperBound INT UNSIGNED,
-            rate TINYINT UNSIGNED
-        );
-        INSERT INTO ret(shop_name, lowerBound, upperBound, rate)
-        SELECT name, MIN(price), MAX(price), rate
-        FROM shop, 
-        --TODO
+        IF EXISTS(
+            SELECT cus_uname
+            FROM favorite
+            WHERE cus_uname = uname AND shop_id = favorite.shop_id
+        ) THEN
+            DELETE FROM favorite
+            WHERE cus_uname = uname AND shop_id = favorite.shop_id;
+        ELSE
+            CALL insertFav(uname, shop_id);
+        END IF;
     END //
+-- CREATE PROCEDURE searchShop (
+--     IN cus_name VARCHAR(20),
+--     IN fav BOOL, IN name VARCHAR(40),
+--     IN lowerBound INT,
+--     In upperBound INT,
+--     IN rate INT
+-- )
+--     BEGIN
+--         CREATE TEMPORARY TABLE ret (
+--             fav BOOL,
+--             shop_name VARCHAR(40) PRIMARY KEY,
+--             lowerBound INT UNSIGNED,
+--             upperBound INT UNSIGNED,
+--             rate TINYINT UNSIGNED
+--         );
+--         INSERT INTO ret(shop_name, lowerBound, upperBound, rate)
+--         SELECT name, MIN(price), MAX(price), rate
+--         FROM shop, 
+--         --TODO
+--     END //
 CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
     FOR EACH ROW
     BEGIN
