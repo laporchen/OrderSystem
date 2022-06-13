@@ -286,9 +286,6 @@ def changeUserPassword(uid, npw):
         print("changeUserPassword went wrong")
         return False
 
-def getUserCart(uid):
-    # get user cart [{},{},....]
-    return []
 
 def updateCart(uid,sid,cart):
     try:
@@ -296,8 +293,10 @@ def updateCart(uid,sid,cart):
             #check item in cart
             exist = 0
             if exist:
+                pass
                 #update cart item
             else:
+                pass
             #insert into cart
         return True
     except Exception as e:
@@ -307,6 +306,7 @@ def updateCart(uid,sid,cart):
 def placeOrder(uid,sid,cart):
     try:
         for key in cart:
+            pass
             #insert item to order
         return True
     except Exception as e:
@@ -319,7 +319,7 @@ def clearCart(uid,sid,cart):
     except Exception as e:
         return False
 
-def rateOrder(uid,sid,rating):
+def rateOrder(uid,sid,oid,rating):
     try:
         #insert rate info
         return True
@@ -327,6 +327,23 @@ def rateOrder(uid,sid,rating):
         return False
 
 def userOrder(uid):
-    
+    global cursor
+    try:
+        sql = f"SELECT * FROM ORDERS WHERE cus_uname = '{uid}' AND state <> 'inCart'"
+        cursor.execute()
+        f = cursor.fetchall()
+        orders = []
+        for order in f:
+            orders.append({
+                "orderID" : order[0],
+                "orderTime" : order[4],
+                "total" : order[3],
+                "rating" : order[6]
+            })
+        
+        return orders
+    except Exception as e:
+        print("userOrder went wrong")
+        return False
     return []
  

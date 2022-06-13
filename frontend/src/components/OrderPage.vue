@@ -48,6 +48,7 @@
 
 <script>
 //import { mapGetters } from "vuex";
+import axios from "axios";
 export default {
 	name: "OrderPage",
 	data() {
@@ -71,12 +72,30 @@ export default {
             return sum;
         },
         async rateOrder(rating,orderNumber,storeID,index) {
-            this.orders[index].rating = rating;
+            let res = await axios.post("/rateOrder", {
+                "userID" : this.$store.getters.user.user,
+                "storeID" : storeID,
+                "orderID" : orderNumber,
+                "rating" : rating,
+            })
+            if(res.data?.status === "success") {
+                this.orders[index].rating = rating;
+            }
+            else {
+                alert("Failed to rate this order.")
+            }
             //fire an event to backend to update db
         }
 	},
-	created() {
+	async created() {
         // something to fetch user order data from backend.
+        let res = await axios.post("/userOrders",{
+            "userID" : this.$store.getters.user.user,
+            "isSeller" : this.$store.getters.seller,
+        })
+        if(res.data?.status === "success") {
+            this.orders = res.data.orders;
+        } 
 	},
 };
 </script>

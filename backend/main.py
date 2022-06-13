@@ -285,19 +285,20 @@ def changePassword():
     else:
         return "Invalid request", 400
 
-@app.route("/api/getCart",methods = ['GET'])
+@app.route("/api/getCarts",methods = ['POST'])
 @jwt_required()
 def getCart():
-    # message = {"status":"failed"}
-    if request.method == 'GET':
+    # only post can have data in body
+    message = {"status":"failed"}
+    if request.method == 'POST':
         post_data = request.get_json()
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
             return jsonify(message), 400
         uid = post_data["userID"]
-        cart = sql.getUserCart(uid)
+        cart = sql.getAllUserCart(uid)
         message["carts"] = cart
-        # message["status"] = "success"
+        message["status"] = "success"
         return jsonify(message)
     else:
         message["message"] = "invalid request"
@@ -306,7 +307,7 @@ def getCart():
 @jwt_required()
 def updateCart():
     message = {"status":"failed"}
-    if request.method == 'POST'
+    if request.method == 'POST':
         post_data = request.get_json()
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
@@ -335,9 +336,11 @@ def placeOrder():
             return jsonify(message), 400
         uid = post_data["UserID"]
         sid = post_data["StoreID"]
-        stat = sql.placeOrder(uid,sid,post_data["cart"]) and sql.clearCart(uid,sid,post_data["cart"])
+        stat = sql.placeOrder(uid,sid,post_data["cart"]) 
+        sql.clearCart(uid,sid,post_data["cart"]) 
+        # if clear data failed but placeOrder success, stat will be wrong since order is placed but return failed
         if stat:
-            message["message"] = "failtoPlaceOrder"
+            message["message"] = "failed to place order"
         else:
             message["status"] = "success"
             message["message"] = "Order Placed"
@@ -351,6 +354,7 @@ def placeOrder():
 #     //data
 #     "userID" :uid,
 #     "storeID":sid,
+#     "orderID":oid,
 #     "rating": 3,
 # }
 # {
@@ -368,10 +372,11 @@ def rateOrder():
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
             return jsonify(message), 400
-        uid = post_data["UserID"]
-        sid = post_data["StoreID"]
+        uid = post_data["userID"]
+        sid = post_data["storeID"]
+        oid = post_data["orderID"]
         rating = post_data["rating"]
-        if sql.rateOrder(uid,sid,rating):
+        if sql.rateOrder(uid,sid,oid,rating):
             message["status"] = "succcess"
             message["message"] = "update"
         else:
@@ -397,7 +402,7 @@ def rateOrder():
 #             }]
 # }
 
-@app.route("/api/userOrders",methods = 'POST')
+@app.route("/api/userOrders",methods = ['POST'])
 @jwt_required()
 def userOrders():
     message = {"status":"failed"}
@@ -407,7 +412,8 @@ def userOrders():
             message["message"] = "You are not a customer"
             return jsonify(message), 400
         uid = post_data["userID"]
-        message["orders"] = sql.userorder(uid)
+        message["orders"] = sql.userOrder(uid)
+        message["status"] = "success"
         return jsonify(message)
     else :
         message["message"] = "invalid request"
