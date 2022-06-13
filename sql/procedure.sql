@@ -48,9 +48,9 @@ CREATE PROCEDURE insertShop (
         DECLARE shopID INT DEFAULT 0;
         INSERT INTO shop
         VALUES (0, mer_uname, name, openTime, closeTime, phone, email, 3);
-        SELECT ID AS shopID 
+        SELECT ID INTO shopID 
         FROM shop
-        WHERE shop.ID = shopID;
+        WHERE shop.name = name;
         INSERT INTO address
         VALUES (shopID, city, district, road, lane, alley, no, floor);
     END //
