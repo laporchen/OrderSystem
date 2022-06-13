@@ -125,7 +125,7 @@ READS SQL DATA
     END //
 CREATE FUNCTION isMerchant (uname VARCHAR(20))
 RETURNS BOOL
-READ SQL DATA
+READS SQL DATA
     BEGIN
         DECLARE ret BOOL DEFAULT TRUE;
         SELECT EXISTS (
@@ -218,4 +218,12 @@ CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
 DELIMITER ;
 
 -- TODO
--- checkUserExist
+-- getUserCart(sid, uid)
+-- getAllUserCart(uid)
+-- getShopFilter(filter)
+-- updateShop(sid, store)
+-- getShopOrders(sid)
+-- updateOrder(sid, oid, status)
+-- getUserOrders(uid)
+-- modify: insertFav => updateFav
+-- updatePwd(uid, pwd)
