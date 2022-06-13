@@ -48,9 +48,9 @@ CREATE PROCEDURE insertShop (
         DECLARE shopID INT DEFAULT 0;
         INSERT INTO shop
         VALUES (0, mer_uname, name, openTime, closeTime, phone, email, 3);
-        SELECT ID INTO shopID 
+        SELECT ID AS shopID 
         FROM shop
-        WHERE shop.name = name;
+        WHERE shop.ID = shopID;
         INSERT INTO address
         VALUES (shopID, city, district, road, lane, alley, no, floor);
     END //
@@ -235,11 +235,7 @@ CREATE PROCEDURE getShopByUname (IN mer_name VARCHAR(20))
     BEGIN
         SELECT *
         FROM shop
-<<<<<<< HEAD
         WHERE mer_uname = shop.mer_name;
-=======
-        WHERE mer_uname = uname;
->>>>>>> 8ab450d65311300f068936f12c90a094d741dda4
     END //
 CREATE PROCEDURE getShopByID (IN ID INT)
     BEGIN
@@ -247,7 +243,6 @@ CREATE PROCEDURE getShopByID (IN ID INT)
         FROM shop
         WHERE shop.ID = ID;
     END //
-<<<<<<< HEAD
 
 CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     BEGIN
@@ -340,11 +335,6 @@ CREATE PROCEDURE updateShopInfo (
     IN closeTime TIME,
     IN phone VARCHAR(20),
     IN email VARCHAR(40)
-=======
-CREATE PROCEDURE updateFav (
-    IN uname VARCHAR(20),
-    IN shop_id INT
->>>>>>> 8ab450d65311300f068936f12c90a094d741dda4
 )
     BEGIN
         UPDATE shop
