@@ -286,4 +286,47 @@ def changeUserPassword(uid, npw):
         print("changeUserPassword went wrong")
         return False
 
+def getUserCart(uid):
+    # get user cart [{},{},....]
+    return []
+
+def updateCart(uid,sid,cart):
+    try:
+        for key in cart
+            #check item in cart
+            exist = 0
+            if exist:
+                #update cart item
+            else:
+            #insert into cart
+        return True
+    except Exception as e:
+        return False
+
+
+def placeOrder(uid,sid,cart):
+    try:
+        for key in cart
+            #insert item to order
+        return True
+    except Exception as e:
+        return False
+
+def clearCart(uid,sid,cart):
+    try:
+        #clear the cart
+        return True
+    except Exception as e:
+        return False
+
+def rateOrder(uid,sid,rating):
+    try:
+        #insert rate info
+        return True
+    except Exception as e:
+        return False
+
+def userOrder(uid):
+    
+    return []
  
