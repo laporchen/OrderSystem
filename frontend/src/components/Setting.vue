@@ -53,10 +53,11 @@ export default {
                 return;
             }
             let data = {
+                username: this.$store.getters.user.user,
                 oldPassword : this.oldPassword,
                 newPassword : this.newPassword,
                 confirmPassword : this.confirmPassword
-            }
+            };
             let response = await axios.post("/api/changePassword", data);
             if(response.data.success) {
                 alert("Password changed successfully!");

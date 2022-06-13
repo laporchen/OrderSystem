@@ -14,7 +14,7 @@
                         <span class="fa fa-star"></span>
                     </template>
                 </th>
-                <th style="width:10% font:120%" @click="userFav = !userFav" :class="{fav:userFav}"><span class="fa fa-heart"></span></th>
+                <th style="width:10% font:120%" @click="favClick()" :class="{fav:userFav}"><span class="fa fa-heart"></span></th>
             </thead>
         </table>
 
@@ -62,7 +62,8 @@
 </template>
 
 <script>
-//import { mapGetters } from "vuex";
+//import { mapGetters } from "vuex";o
+import axios from "axios"
 export default {
 	name: "Store",
 	data() {
@@ -115,6 +116,15 @@ export default {
         async placeOrder() {
             // fire event to backend
             // if failed then give an error message to user
+        },
+        async favClick() {
+            let res = await axios.post("userFavStoreUpdate", {
+                username : this.$store.getters.user.user,
+                storeID : this.storeID
+            })
+            if(res.data?.status === "success") {
+                this.userFav = !this.userFav
+            }
         }
 	},
 	created() {
@@ -126,10 +136,10 @@ export default {
         this.storePhone = "093112651";
         this.storeAddress = "106台北市大安區和平東路一段162號";
         this.storeRating = 4;
-        this.storeItems = { 
-           1:{id:1, name:"Striver Food",price:32},
-           2:{id:2, name:"Striver Combo",price:100},
-        }
+        this.storeItems = [ 
+           {id:1, name:"Striver Food",price:32},
+           {id:2, name:"Striver Combo",price:100},
+        ]
         // assigned users cart to useCart if it exists
         this.hasItem();
 	},
