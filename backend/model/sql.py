@@ -306,7 +306,7 @@ def updateCart(uid,sid,cart):
 
 def placeOrder(uid,sid,cart):
     try:
-        for key in cart
+        for key in cart:
             #insert item to order
         return True
     except Exception as e:
