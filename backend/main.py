@@ -2,6 +2,8 @@ import datetime
 from email import message
 from glob import escape
 
+from requests import post
+
 
 from model.classes import *
 import model.sql as sql
@@ -175,7 +177,7 @@ def returnStore():
             return jsonify(message)
 
         store = sql.getStoreInfo(sid)
-        message = {"status": "success"}
+        message["status"] =  "success"
         message["store"] = store
         return jsonify(message)
     else:
@@ -334,11 +336,9 @@ def placeOrder():
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
             return jsonify(message), 400
-        uid = post_data["UserID"]
-        sid = post_data["StoreID"]
+        uid = post_data["userID"]
+        sid = post_data["orderID"]
         stat = sql.placeOrder(uid,sid,post_data["cart"]) 
-        sql.clearCart(uid,sid,post_data["cart"]) 
-        # if clear data failed but placeOrder success, stat will be wrong since order is placed but return failed
         if stat:
             message["message"] = "failed to place order"
         else:

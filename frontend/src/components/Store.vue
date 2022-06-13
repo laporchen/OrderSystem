@@ -74,6 +74,7 @@ export default {
             currentTotal : 0,
             userFav : false,
             userCart : {},
+            orderID : 0,
             cartHasItem : false,
             dataFetched : false,
 		};
@@ -113,6 +114,17 @@ export default {
         },
         async placeOrder() {
             // fire event to backend
+            let response = await axios.post("/placeOrder",{
+                "userID" : this.$store.getters.user.user,
+                "storeID" : this.storeID,
+            })
+            if(response.data?.status === "success") {
+                alert("Order placed.")
+                this.$router.go();
+            }
+            else {
+                alert("Order failed to place.")
+            }
             // if failed then give an error message to user
         },
         async favClick() {
@@ -130,7 +142,7 @@ export default {
         // if store does not exist , redirect to home page
         //feteched data is assigned to the page here
         let res = await axios.post("/store",{
-            "username":this.$store.getters.user,
+            "username":this.$store.getters.user.user,
             "isSeller":this.$store.getters.seller,
             "storeID": this.$route.params.storeName
         })
@@ -146,6 +158,7 @@ export default {
         this.storeAddress = s.storeAddress;
         this.storeRating = s.storeRating;
         this.storeItems =  s.storeItems;
+        this.userCart = res.data.cart;
         // assigned users cart to useCart if it exists
         this.hasItem();
         this.dataFetched = true;

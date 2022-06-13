@@ -172,7 +172,7 @@ export default {
         //feteched data is assigned to the page here
         let response = await axios.post("/store", {
             isSeller : this.$store.state.seller,
-            userID : this.$store.getters.user.user,
+            username : this.$store.getters.user.user,
             storeID: 0,
         });
         if(response?.data?.status != "success") {

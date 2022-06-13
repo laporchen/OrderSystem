@@ -24,15 +24,6 @@ def main():
         print(e)
         return None 
 
-
-def createDataBase():
-    try:
-        print("dummyy")
-    except Exception as e:
-        print(e, "something went wrong")
-        return False
-
-
 def userExist(username):
     global cursor
     try:
@@ -228,15 +219,12 @@ def updateStore(sid,storeInfo):
 
 def getUserCart(sid,uid):
     # some sql procedure to get user cart
+    global cursor
     return {}
 
 def getAllUserCart(uid):
     # some sql procedure to get all user cart
     return {}
-
-def updateStore(sid, store):
-    # some sql procedure to update store
-    return True
 
 def getStoreOrders(sid):
     # some sql procedure to get store orders
@@ -287,7 +275,7 @@ def changeUserPassword(uid, npw):
         return False
 
 
-def updateCart(uid,sid,cart):
+def updateCart(uid,oid,cart):
     try:
         for key in cart:
             #check item in cart
@@ -303,7 +291,7 @@ def updateCart(uid,sid,cart):
         return False
 
 
-def placeOrder(uid,sid,cart):
+def placeOrder(uid,oid,cart):
     try:
         for key in cart:
             pass
@@ -329,16 +317,40 @@ def rateOrder(uid,sid,oid,rating):
 def userOrder(uid):
     global cursor
     try:
-        sql = f"SELECT * FROM ORDERS WHERE cus_uname = '{uid}' AND state <> 'inCart'"
-        cursor.execute()
+        sql = f"SELECT * FROM ORDERS WHERE cus_uname = '{uid}' AND state <> 'inCart'" # get orders procedure
+        cursor.execute(sql)
         f = cursor.fetchall()
         orders = []
         for order in f:
+            # should be able to get order item here 
+            orderItem = []
+            sql = f"SELECT * FROM CONTAIN WHERE order_id = {order[0]}"
+            cursor.execute(sql)
+            items = cursor.fetchall()
+            storeName = ""
+            storeID = 0
+            for item in items:
+                sql = f"SELECT * FROM ITEM WHERE ID = {item[2]} AND shop_id = {item[1]}"
+                storeID = item[1]
+                cursor.execute(sql)
+                itemInfo = cursor.fetchone()
+                orderItem.append({
+                    "id" : itemInfo[0],
+                    "name":itemInfo[2],
+                    "quantity" : item[3],
+                    "price" : itemInfo[4] * item[3]
+                })
+            sql = f"SELECT name FROM SHOP WHERE ID = {storeID}"
+            cursor.execute(sql)
+            storeName = cursor.fetchone()[0]
+
             orders.append({
                 "orderID" : order[0],
                 "orderTime" : order[4],
                 "total" : order[3],
-                "rating" : order[6]
+                "rating" : order[6],
+                "storeName" : storeName,
+                "orderItems" : orderItem
             })
         
         return orders
