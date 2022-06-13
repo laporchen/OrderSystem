@@ -1,17 +1,14 @@
 <template>
-    <div id="store">
+    <div id="store" v-if="dataFetched">
         <h3>{{storeName}}</h3>
-        <h5>{{storeAddress}}</h5>
+        <h5>Address : {{storeAddress}}</h5>
         <table>
             <thead>
                 <th style="width:15%"><h4>{{storePhone}}</h4></th>
                 <th style="width:60%"></th>
                 <th style="width:15%">
-                    <template v-for="n in storeRating" :key="n">
-                        <span class="fa fa-star checked"></span>
-                    </template>
-                    <template v-for="n in 5 - storeRating" :key="n">
-                        <span class="fa fa-star"></span>
+                    <template v-for="n in 5" :key="n">
+                        <span :class="{checked:(n<=storeRating)}" class="fa fa-star"></span>
                     </template>
                 </th>
                 <th style="width:10% font:120%" @click="favClick()" :class="{fav:userFav}"><span class="fa fa-heart"></span></th>
@@ -77,7 +74,9 @@ export default {
             currentTotal : 0,
             userFav : false,
             userCart : {},
-            cartHasItem : false
+            orderID : 0,
+            cartHasItem : false,
+            dataFetched : false,
 		};
 	},
 	methods: {
@@ -115,33 +114,54 @@ export default {
         },
         async placeOrder() {
             // fire event to backend
+            let response = await axios.post("/placeOrder",{
+                "userID" : this.$store.getters.user.user,
+                "storeID" : this.storeID,
+            })
+            if(response.data?.status === "success") {
+                alert("Order placed.")
+                this.$router.go();
+            }
+            else {
+                alert("Order failed to place.")
+            }
             // if failed then give an error message to user
         },
         async favClick() {
             let res = await axios.post("userFavStoreUpdate", {
                 username : this.$store.getters.user.user,
-                storeID : this.storeID
+                storeID : this.storeID,
             })
             if(res.data?.status === "success") {
                 this.userFav = !this.userFav
             }
         }
 	},
-	created() {
+	async beforeCreate() {
         // fetching store data here.
         // if store does not exist , redirect to home page
         //feteched data is assigned to the page here
-        this.storeName = "Raj's Fast Food";
-        this.storeID = 1;
-        this.storePhone = "093112651";
-        this.storeAddress = "106台北市大安區和平東路一段162號";
-        this.storeRating = 4;
-        this.storeItems = [ 
-           {id:1, name:"Striver Food",price:32},
-           {id:2, name:"Striver Combo",price:100},
-        ]
+        let res = await axios.post("/store",{
+            "username":this.$store.getters.user.user,
+            "isSeller":this.$store.getters.seller,
+            "storeID": this.$route.params.storeName
+        })
+        if(res.data?.status !== "success") {
+            this.$router.push("/browse");
+            return;
+        }
+
+        let s = res.data.store;
+        this.storeName = s.storeName;
+        this.storeID = s.storeID;
+        this.storePhone = s.storePhone;
+        this.storeAddress = s.storeAddress;
+        this.storeRating = s.storeRating;
+        this.storeItems =  s.storeItems;
+        this.userCart = res.data.cart;
         // assigned users cart to useCart if it exists
         this.hasItem();
+        this.dataFetched = true;
 	},
     beforeUnmount() {
         // save user's cart to database

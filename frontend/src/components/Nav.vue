@@ -40,12 +40,6 @@
 										class="nav-link"
 									>Orders</router-link>
 								</li>
-								<li class="nav-item">
-									<router-link
-										to="/favorite"
-										class="nav-link"
-									>Favorite</router-link>
-								</li>
 							</template>
 							<template v-else>
 								<li class="nav-item">

@@ -1,5 +1,5 @@
 <template>
-    <div id="myStore">
+    <div id="myStore" v-if="dataFetched">
         <h3><input class="editBox" type="text" placeholder="Store Name" v-model="storeName"></h3>
         <div style="display:table">
             <div style="display:table-cell">
@@ -95,6 +95,7 @@ export default {
             delItemID : [],
             modifyItem : [],
             newItem : [],
+            dataFetched : false,
 		};
 	},
 	methods: {
@@ -159,11 +160,8 @@ export default {
                 alert("Error : Cannot update your store, please try again later");
             }
             else {
-                this.oldItem = JSON.parse(JSON.stringify(this.storeItems));
-                this.newItem = []
-                this.delItemID = [];
-                this.modifyItem = [];
                 alert("Success : Your store has been updated");
+                this.$router.go()
             }
             // if failed then give an error message to user
         }
@@ -174,13 +172,14 @@ export default {
         //feteched data is assigned to the page here
         let response = await axios.post("/store", {
             isSeller : this.$store.state.seller,
-            userID : this.$store.getters.user,
+            username : this.$store.getters.user.user,
+            storeID: 0,
         });
-        console.log(response.data.store);
         if(response?.data?.status != "success") {
             this.$router.push("/");
         }
         let storeInfo = response.data.store;
+        console.log(storeInfo)
         this.storeName = storeInfo.storeName;
         this.storeID = storeInfo.storeID;
         this.storePhone = storeInfo.storePhone;
@@ -189,6 +188,7 @@ export default {
         this.storeItems = storeInfo.storeItems;
         this.itemIDcounter = storeInfo.IDcounter;
         this.oldItem = JSON.parse(JSON.stringify(storeInfo.storeItems));
+        this.dataFetched = true;
 	},
     async beforeUnmount() {
     }

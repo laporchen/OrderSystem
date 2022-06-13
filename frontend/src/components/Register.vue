@@ -9,6 +9,7 @@
 					class="form-control"
 					v-model="first_name"
 					placeholder="Enter first name"
+					maxlength="18"
 				/>
 			</div>
 			<div class="form-group">
@@ -18,6 +19,7 @@
 					class="form-control"
 					v-model="last_name"
 					placeholder="Enter last name"
+					maxlength="18"
 				/>
 			</div>
 			<div class="form-group">
@@ -27,6 +29,7 @@
 					class="form-control"
 					v-model="username"
 					placeholder="Enter username"
+					maxlength="20"
 				/>
 			</div>
 			<div class="form-group">
@@ -36,6 +39,7 @@
 					class="form-control"
 					v-model="password"
 					placeholder="Enter password"
+					maxlength="30"
 				/>
 			</div>
 			<div class="form-group">
@@ -45,6 +49,7 @@
 					class="form-control"
 					v-model="password_confirmation"
 					placeholder="Enter password"
+					maxlength="30"
 				/>
 			</div>
 			<div class="form-group">

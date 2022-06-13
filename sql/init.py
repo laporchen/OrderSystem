@@ -23,7 +23,6 @@ def create():
         global cursor
         global db
         cursor.execute("CREATE DATABASE OrderSystem")
-        db.commit()
     except Exception as e:
         print(e)
 
@@ -70,7 +69,7 @@ def parse_sql(filename):
             continue
 
         if stmt:
-            stmt += line
+            stmt += line.replace(DELIMITER,';')
             stmts.append(stmt.strip())
             stmt = ''
         else:

@@ -1,5 +1,8 @@
 import datetime
 from email import message
+from glob import escape
+
+from requests import post
 
 
 from model.classes import *
@@ -159,18 +162,22 @@ def returnUser():
 def returnStore():
     if request.method == 'POST':
         post_data = request.get_json()
-        print(post_data)
-        sid = -1
-        uid = post_data["userID"]
+        uid = post_data["username"]
+        sid = None 
+        message = {}
         if post_data["isSeller"] == False:
             sid = post_data["storeID"]
             cart = sql.getUserCart(sid, post_data["username"])
             message["cart"] = cart
         else:
             sid = sql.getUserStore(uid)
+
+        if sid == None:
+            message = {"status": "failed","message":"Cannot find the store"}
+            return jsonify(message)
+
         store = sql.getStoreInfo(sid)
-        # need to check userid is the owner of storeid if user is seller
-        message = {"status": "success"}
+        message["status"] =  "success"
         message["store"] = store
         return jsonify(message)
     else:
@@ -279,6 +286,138 @@ def changePassword():
 
     else:
         return "Invalid request", 400
+
+@app.route("/api/getCarts",methods = ['POST'])
+@jwt_required()
+def getCart():
+    # only post can have data in body
+    message = {"status":"failed"}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        if post_data["isSeller"] == True:
+            message["message"] = "You are not a customer"
+            return jsonify(message), 400
+        uid = post_data["userID"]
+        cart = sql.getAllUserCart(uid)
+        message["carts"] = cart
+        message["status"] = "success"
+        return jsonify(message)
+    else:
+        message["message"] = "invalid request"
+
+@app.route("/api/updateCart", methods = ['POST'])
+@jwt_required()
+def updateCart():
+    message = {"status":"failed"}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        if post_data["isSeller"] == True:
+            message["message"] = "You are not a customer"
+            return jsonify(message), 400
+        uid = post_data["UserID"]
+        sid = post_data["StoreID"]
+        stat = sql.updateCart(uid,sid,post_data["cart"])
+        if not stat:
+            message["message"] = "failtoUpdate"
+        else:
+            message["status"] = "success"
+            message["message"] = "update"
+        return jsonify(message)
+    else :
+        message["message"] = "invalid request"
+        return jsonify(message)
+
+@app.route("/api/placeOrder", methods = ['POST'])
+@jwt_required()
+def placeOrder():
+    message = {"status":"failed"}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        if post_data["isSeller"] == True:
+            message["message"] = "You are not a customer"
+            return jsonify(message), 400
+        uid = post_data["userID"]
+        sid = post_data["orderID"]
+        stat = sql.placeOrder(uid,sid,post_data["cart"]) 
+        if stat:
+            message["message"] = "failed to place order"
+        else:
+            message["status"] = "success"
+            message["message"] = "Order Placed"
+        return jsonify(message)
+    else :
+        message["message"] = "invalid request"
+        return jsonify(message)
+
+
+# {
+#     //data
+#     "userID" :uid,
+#     "storeID":sid,
+#     "orderID":oid,
+#     "rating": 3,
+# }
+# {
+#     //return
+#     "status":"success",
+#     "message": "updated",
+# }
+
+@app.route("/api//api/rateOrder",methods = ['POST'])
+@jwt_required()
+def rateOrder():
+    message = {"status":"failed"}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        if post_data["isSeller"] == True:
+            message["message"] = "You are not a customer"
+            return jsonify(message), 400
+        uid = post_data["userID"]
+        sid = post_data["storeID"]
+        oid = post_data["orderID"]
+        rating = post_data["rating"]
+        if sql.rateOrder(uid,sid,oid,rating):
+            message["status"] = "succcess"
+            message["message"] = "update"
+        else:
+            message["message"] = "failed to update"
+        return jsonify(message)
+    else :
+        message["message"] = "invalid request"
+        return jsonify(message)
+
+# {
+#     "userID" : uid
+# }
+# {
+#     "orders" : [{
+#             orderNumber:5,
+#             orderDate:"2022/05/22",
+#             rating: 0, // 0 means not rate yet
+#             store:"Demon Burger",
+#             storeID:3,
+#             orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},...],
+#             time:"2022-06-05 20:32",
+#             status : "Canceled"
+#             }]
+# }
+
+@app.route("/api/userOrders",methods = ['POST'])
+@jwt_required()
+def userOrders():
+    message = {"status":"failed"}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        if post_data["isSeller"] == True:
+            message["message"] = "You are not a customer"
+            return jsonify(message), 400
+        uid = post_data["userID"]
+        message["orders"] = sql.userOrder(uid)
+        message["status"] = "success"
+        return jsonify(message)
+    else :
+        message["message"] = "invalid request"
+        return jsonify(message)
 
 if __name__ == '__main__':
     app.run(debug=True,port=8081)

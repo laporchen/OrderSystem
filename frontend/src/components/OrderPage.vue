@@ -4,7 +4,7 @@
         <ul>
         <template v-for="(order,index) in orders" :key="order.orderNumber">
         <li>        
-                <p>Order Date : {{order.orderDate}}</p>
+                <p>Order Date : {{order.orderTime}}</p>
                 <b @click="gotoStore(order.storeID)" style="cursor:pointer">Store : {{order.store}}</b>
                 <div v-if="order.status === 'Completed'">
                     <template v-if="order.rating === 0">
@@ -48,16 +48,17 @@
 
 <script>
 //import { mapGetters } from "vuex";
+import axios from "axios";
 export default {
 	name: "OrderPage",
 	data() {
 		return {
             orders : [
-                {orderNumber:1,orderDate:"2022/05/19",rating: 4,store:"Striver Pizza",storeID:1,orderItems : [{id: 32,name:"Striver Special",quantity : 1, price :100}, {id : 31,name:"Raj Cola", quantity: 69,price:690}],time:"2022-06-04 13:32",status : "Completed"},
-                {orderNumber:2,orderDate:"2022/05/22",rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Completed"},
-                {orderNumber:3,orderDate:"2022/05/22",rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
-                {orderNumber:4,orderDate:"2022/05/22",rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
-                {orderNumber:5,orderDate:"2022/05/22",rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
+                {orderNumber:1,rating: 4,store:"Striver Pizza",storeID:1,orderItems : [{id: 32,name:"Striver Special",quantity : 1, price :100}, {id : 31,name:"Raj Cola", quantity: 69,price:690}],time:"2022-06-04 13:32",status : "Completed"},
+                {orderNumber:2,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Completed"},
+                {orderNumber:3,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
+                {orderNumber:4,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
+                {orderNumber:5,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
             ]
 		};
 	},
@@ -71,12 +72,30 @@ export default {
             return sum;
         },
         async rateOrder(rating,orderNumber,storeID,index) {
-            this.orders[index].rating = rating;
+            let res = await axios.post("/rateOrder", {
+                "userID" : this.$store.getters.user.user,
+                "storeID" : storeID,
+                "orderID" : orderNumber,
+                "rating" : rating,
+            })
+            if(res.data?.status === "success") {
+                this.orders[index].rating = rating;
+            }
+            else {
+                alert("Failed to rate this order.")
+            }
             //fire an event to backend to update db
         }
 	},
-	created() {
+	async created() {
         // something to fetch user order data from backend.
+        let res = await axios.post("/userOrders",{
+            "userID" : this.$store.getters.user.user,
+            "isSeller" : this.$store.getters.seller,
+        })
+        if(res.data?.status === "success") {
+            //this.orders = res.data.orders;
+        } 
 	},
 };
 </script>
