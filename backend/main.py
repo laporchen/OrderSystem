@@ -160,7 +160,7 @@ def returnUser():
 def returnStore():
     if request.method == 'POST':
         post_data = request.get_json()
-        uid = post_data["userID"]
+        uid = post_data["username"]
         sid = None 
         if post_data["isSeller"] == False:
             sid = post_data["storeID"]

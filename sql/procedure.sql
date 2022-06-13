@@ -150,13 +150,13 @@ CREATE PROCEDURE getShopByUname (IN uname VARCHAR(20))
         SELECT *
         FROM shop
         WHERE mer_uname = uname;
-    END;
+    END //
 CREATE PROCEDURE getShopByID (IN ID INT)
     BEGIN
         SELECT *
         FROM shop
         WHERE shop.ID = ID;
-    END;
+    END //
 CREATE PROCEDURE updateFav (
     IN uname VARCHAR(20),
     IN shop_id INT

@@ -228,6 +228,7 @@ def updateStore(sid,storeInfo):
 
 def getUserCart(sid,uid):
     # some sql procedure to get user cart
+
     return {}
 
 def getAllUserCart(uid):

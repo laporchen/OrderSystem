@@ -131,9 +131,10 @@ export default {
         // fetching store data here.
         // if store does not exist , redirect to home page
         //feteched data is assigned to the page here
-        let res = await axios.post(`/store/${this.$route.params.storeName}`,{
-            "userID":this.$store.getters.user,
-            "isSeller":this.$store.getters.seller
+        let res = await axios.post("/store",{
+            "username":this.$store.getters.user,
+            "isSeller":this.$store.getters.seller,
+            "storeID": this.$route.params.storeName
         })
         if(res.data?.status !== "success") {
             this.$router.push("/browse");
