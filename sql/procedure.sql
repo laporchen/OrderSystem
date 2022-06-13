@@ -218,4 +218,12 @@ CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
 DELIMITER ;
 
 -- TODO
--- checkUserExist
+-- getUserCart(sid, uid)
+-- getAllUserCart(uid)
+-- getShopFilter(filter)
+-- updateShop(sid, store)
+-- getShopOrders(sid)
+-- updateOrder(sid, oid, status)
+-- getUserOrders(uid)
+-- modify: insertFav => updateFav
+-- updatePwd(uid, pwd)
