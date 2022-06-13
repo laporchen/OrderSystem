@@ -292,7 +292,7 @@ def getUserCart(uid):
 
 def updateCart(uid,sid,cart):
     try:
-        for key in cart
+        for key in cart:
             #check item in cart
             exist = 0
             if exist:
