@@ -1,5 +1,5 @@
 <template>
-    <div id="myStore">
+    <div id="myStore" v-if="dataFetched">
         <h3><input class="editBox" type="text" placeholder="Store Name" v-model="storeName"></h3>
         <div style="display:table">
             <div style="display:table-cell">
@@ -95,6 +95,7 @@ export default {
             delItemID : [],
             modifyItem : [],
             newItem : [],
+            dataFetched : false,
 		};
 	},
 	methods: {
@@ -187,6 +188,7 @@ export default {
         this.storeItems = storeInfo.storeItems;
         this.itemIDcounter = storeInfo.IDcounter;
         this.oldItem = JSON.parse(JSON.stringify(storeInfo.storeItems));
+        this.dataFetched = true;
 	},
     async beforeUnmount() {
     }

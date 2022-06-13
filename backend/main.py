@@ -162,6 +162,7 @@ def returnStore():
         post_data = request.get_json()
         uid = post_data["username"]
         sid = None 
+        message = {}
         if post_data["isSeller"] == False:
             sid = post_data["storeID"]
             cart = sql.getUserCart(sid, post_data["username"])

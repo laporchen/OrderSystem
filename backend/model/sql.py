@@ -143,7 +143,7 @@ def getStores(filter):
                 "storeID":shop[0],
                 "name":shop[2],
                 "priceRange": [0,1002],
-                "rating":3
+                "rating":shop[7]
             })
 
         return shops 
@@ -169,7 +169,7 @@ def getStoreInfo(sid):
         sql = f"SELECt * FROM ADDRESS WHERE shop_id = {sid}"
         cursor.execute(sql)
         addrTuple = cursor.fetchone()
-        address = addrTuple[1] + addrTuple[2] + addrTuple[3]+ addrTuple[4]+ addrTuple[5]+ str(addrTuple[6]) + " 號" + str(addrTuple[7]) + " 樓"
+        address = f"{addrTuple[1]} {addrTuple[2]} {addrTuple[3]} {addrTuple[4]} {addrTuple[5]} {str(addrTuple[6])} 號 {str(addrTuple[7])} 樓"
 
 
         maxID = 0
@@ -190,7 +190,7 @@ def getStoreInfo(sid):
             "storeAddress": address,
             "storeRating" : store[7],
             "storeItems": menu,
-            "IDcounter": maxID, # 
+            "IDcounter": maxID,  
         }
 
     except Exception as e:
@@ -228,7 +228,6 @@ def updateStore(sid,storeInfo):
 
 def getUserCart(sid,uid):
     # some sql procedure to get user cart
-
     return {}
 
 def getAllUserCart(uid):
@@ -252,21 +251,21 @@ def updateStoreOrder(sid, oid, status):
     # some sql procedure to update store order
     return True
 
-def getUserOders(uid):
+def getUserOrders(uid):
     # some sql procedure to get user orders
+    global cursor
+    try:
+        return []
+    except Exception as e:
+        print("getUserOrders went wrong")
+        return None 
     return []
 
 def updateFav(uid,sid):
     global cursor
     try:
-        sql = f"SELECT * FROM FAVORITE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
+        sql = f"CALL updateFav('{uid}',{sid})"
         cursor.execute(sql)
-        if cursor.rowcount == 1:
-            sql = f"DELETE FROM FAVORITE WHERE cus_name = '{uid}' and shop_id = '{sid}'"
-            cursor.execute(sql)
-        else:
-            sql = f"INSERT INTO FAVORITE VALUES('{uid}',{sid})"
-            cursor.execute(sql)
         db.commit()
 
         return True
@@ -282,8 +281,9 @@ def changeUserPassword(uid, npw):
         sql = f"UPDATE CUSTOMER SET password = '{npw}' WHERE username = '{uid}'"
         cursor.execute(sql)
         db.commit()
-
         return True
     except Exception as e:
-        print(e, "something went wrong")
+        print("changeUserPassword went wrong")
         return False
+
+ 
