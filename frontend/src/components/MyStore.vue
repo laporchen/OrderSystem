@@ -159,11 +159,8 @@ export default {
                 alert("Error : Cannot update your store, please try again later");
             }
             else {
-                this.oldItem = JSON.parse(JSON.stringify(this.storeItems));
-                this.newItem = []
-                this.delItemID = [];
-                this.modifyItem = [];
                 alert("Success : Your store has been updated");
+                this.$router.go()
             }
             // if failed then give an error message to user
         }
@@ -174,13 +171,14 @@ export default {
         //feteched data is assigned to the page here
         let response = await axios.post("/store", {
             isSeller : this.$store.state.seller,
-            userID : this.$store.getters.user,
+            userID : this.$store.getters.user.user,
+            storeID: 0,
         });
-        console.log(response.data.store);
         if(response?.data?.status != "success") {
             this.$router.push("/");
         }
         let storeInfo = response.data.store;
+        console.log(storeInfo)
         this.storeName = storeInfo.storeName;
         this.storeID = storeInfo.storeID;
         this.storePhone = storeInfo.storePhone;

@@ -1,5 +1,6 @@
 import datetime
 from email import message
+from glob import escape
 
 
 from model.classes import *
@@ -159,17 +160,20 @@ def returnUser():
 def returnStore():
     if request.method == 'POST':
         post_data = request.get_json()
-        print(post_data)
-        sid = -1
         uid = post_data["userID"]
+        sid = None 
         if post_data["isSeller"] == False:
             sid = post_data["storeID"]
             cart = sql.getUserCart(sid, post_data["username"])
             message["cart"] = cart
         else:
             sid = sql.getUserStore(uid)
+
+        if sid == None:
+            message = {"status": "failed","message":"Cannot find the store"}
+            return jsonify(message)
+
         store = sql.getStoreInfo(sid)
-        # need to check userid is the owner of storeid if user is seller
         message = {"status": "success"}
         message["store"] = store
         return jsonify(message)

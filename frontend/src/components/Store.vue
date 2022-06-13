@@ -120,17 +120,26 @@ export default {
         async favClick() {
             let res = await axios.post("userFavStoreUpdate", {
                 username : this.$store.getters.user.user,
-                storeID : this.storeID
+                storeID : this.storeID,
             })
             if(res.data?.status === "success") {
                 this.userFav = !this.userFav
             }
         }
 	},
-	created() {
+	async created() {
         // fetching store data here.
         // if store does not exist , redirect to home page
         //feteched data is assigned to the page here
+        let res = await axios.post(`/store/${this.$route.params.storeName}`,{
+            "userID":this.$store.getters.user,
+            "isSeller":this.$store.getters.seller
+        })
+        if(res.data?.status !== "success") {
+            this.$router.push("/browse");
+            return;
+        }
+        console.log(res.data.store);
         this.storeName = "Raj's Fast Food";
         this.storeID = 1;
         this.storePhone = "093112651";

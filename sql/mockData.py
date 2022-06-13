@@ -61,13 +61,15 @@ def fakeSeller():
 
 def insertSeller(seller: User):
     global cursor
+    global db
     try:
         name = seller.first_name + " " + seller.last_name
         sql = f"CALL insertMerchant('{seller.username}', '{name}', '{seller.password}')"
         cursor.execute(sql)
-        sql = f"CALL insertShop('{seller.username}','{name}','00:00:00','12:00:00',NULL,NULL,'test city','mock district', 'raj road', '{seller.username} lane','some alley', 1,1)"
+        db.commit() 
+        sql = f"CALL insertShop('{seller.username}','{name} shop','00:00:00','12:00:00',NULL,NULL,'test city','mock district', 'raj road', '{seller.username} lane','some alley', 1,1)"
         cursor.execute(sql)
-        print(f"seller {seller.username} inserted") 
+        db.commit() 
         return True
     except Exception as e:
         print(e, "insertSeller went wrong")
