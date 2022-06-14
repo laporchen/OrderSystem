@@ -45,7 +45,7 @@ export default {
 				username: this.username,
 				password: this.password,
 			};
-			const response = await axios.post("login", loginUser);
+			const response = await axios.post("login", loginUser)
 			if (response?.data?.status !== "success") {
 				alert("username or password is incorrect");
 				return;

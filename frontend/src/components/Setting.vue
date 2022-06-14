@@ -58,8 +58,8 @@ export default {
                 newPassword : this.newPassword,
                 confirmPassword : this.confirmPassword
             };
-            let response = await axios.post("/api/changePassword", data);
-            if(response.data.success) {
+            let response = await axios.post("/changePassword", data);
+            if(response.data.status === "success") {
                 alert("Password changed successfully!");
             }
             else {
