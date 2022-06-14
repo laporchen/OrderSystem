@@ -125,6 +125,10 @@ CREATE PROCEDURE getOrderIdAsCart (
                 FROM orders
                 WHERE cus_uname = orders.cus_uname;
             END;
+        ELSE
+            UPDATE orders
+            SET orders.total = total
+            WHERE order_id = orders.order_id;
         END IF;
         SELECT order_id;
     END //
