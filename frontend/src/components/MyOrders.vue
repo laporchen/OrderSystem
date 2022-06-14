@@ -6,7 +6,7 @@
         <li>        
                 <p>Order Date : {{order.orderDate}}</p>
                 <b>User : {{order.user}}</b><br>
-                <b :class="{ Completed: 'completed', Canceled: 'canceled', Preparing: 'preparing', Pending: 'pending' }[order.status]">
+                <b :class="{ COMPLETED: 'completed', CANCELED: 'canceled', PREPARING: 'preparing', PENDING: 'pending' }[order.status]">
                             Order Status : {{order.status}}
                 </b>
 
@@ -23,13 +23,14 @@
                     </tbody>
                 </table>
         </li>        
-        <template v-if="order.status === 'Pending'">
-            <button class="btn btn-primary orderBtn" @click="confirmOrder(index,order.orderNumber)">Confirm</button>
-            <button class="btn btn-danger orderBtn" @click="cancelOrder(index,order.orderNumber)">Reject</button>
+        <template v-if="order.status === 'PENDING'">
+            <button class="btn btn-primary orderBtn" @click="changeOrderState(index,order.orderNumber,'PREPARING')">Confirm</button>
+            <button class="btn btn-danger orderBtn" @click="changeOrderState(index,order.orderNumber,'CANCELED')">Reject</button>
         </template>
-        <template v-else-if="order.status === 'Preparing'">
-            <button class="btn btn-success orderBtn" @click="completeOrder(index,order.orderNumber)">Complete</button>
+        <template v-else-if="order.status === 'PREPARING'">
+            <button class="btn btn-success orderBtn" @click="changeOrderState(index,order.orderNumber,'COMPLETED')">Complete</button>
         </template>
+        <b>Total : {{order.total}} </b>
         <hr>
         </template> 
         </ul>
@@ -55,53 +56,28 @@ export default {
             order.orderItems.forEach(item => sum += item.price);
             return sum;
         },
-        async completeOrder(index,orderID) {
+        async changeOrderState(index,orderID,status) {
             let res = await axios.post("/updateStoreOrder",{
-                userID : this.$store.state.user,
+                userID : this.$store.state.user.user,
                 isSeller : this.$store.state.seller,
                 orderID : orderID,
-                newStatus : "Completed"
+                newStatus : status
             });
             if(res.data?.status !== "success") {
                 alert("Error");
                 return;
             }
-            this.orders[index].status = "Completed";
-        },
-        async cancelOrder(index,orderID) {
-            let res = await axios.post("/updateStoreOrder",{
-                userID : this.$store.state.user,
-                isSeller : this.$store.state.seller,
-                orderID : orderID,
-                newStatus : "Canceled"
-            });
-            if(res.data?.status !== "success") {
-                alert("Error");
-                return;
-            }
-            this.orders[index].status = "Canceled";
-        },
-        async confirmOrder(index,orderID) {
-            let res = await axios.post("/updateStoreOrder",{
-                userID : this.$store.state.user,
-                isSeller : this.$store.state.seller,
-                orderID : orderID,
-                newStatus : "Preparing"
-            });
-            if(res.data?.status !== "success") {
-                alert("Error");
-                return;
-            }
-            this.orders[index].status = "Preparing";
+            this.orders[index].status = status;
         },
 	},
 	async created() {
         // something to fetch user order data from backend.
         let response = await axios.post("/getStoreOrders",{
-            userID : this.$store.state.user,
+            userID : this.$store.state.user.user,
             isSeller : this.$store.state.seller
         });
         if(response?.data?.status === "success") {
+            console.log(response.data.orders);
             this.orders = response.data.orders;
         }
         else {

@@ -190,7 +190,7 @@ CREATE PROCEDURE rateOrder (IN order_id INT, IN rate TINYINT)
     BEGIN
         UPDATE orders
         SET orders.rate = rate
-        WHERE order_id = orders.ID;
+        WHERE orders.ID = rate;
     END //
 CREATE FUNCTION checkUsernameAvail (uname VARCHAR(20))
 RETURNS BOOL
@@ -274,53 +274,75 @@ CREATE PROCEDURE updatePwd(IN uname VARCHAR(20), IN pwd VARCHAR(30))
         SET password = pwd
         WHERE username = uname;
     END //
+CREATE PROCEDURE getShopOrders(IN sid INT)
+    BEGIN
+        SELECT orders.ID, orders.cus_uname, itemTmp.name,
+        itemTmp.price, contain.number, orders.total , orders.orderTime, orders.state
+        FROM orders, contain, (
+            SELECT ID, name, price ,shop_id
+            FROM item
+        ) AS itemTmp
+        WHERE orders.state <> "INCART" AND contain.shop_id = sid
+            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID AND itemTmp.shop_id = sid;
+    END
 CREATE PROCEDURE getShopPendingOrders (IN shop_id INT)
     BEGIN
         SELECT orders.ID, orders.cus_uname, itemTmp.name,
-        itemTmp.price, contain.number, orders.total
+        itemTmp.price, contain.number, orders.total , orders.orderTime, orders.state
         FROM orders, contain, (
-            SELECT ID, name, price
+            SELECT ID, name, price ,shop_id
             FROM item
         ) AS itemTmp
         WHERE orders.state = "PENDING" AND contain.shop_id = shop_id
-            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID;
+            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID AND contain.shop_id = itemTmp.shop_id;
     END //
 CREATE PROCEDURE getShopPreparingOrders (IN shop_id INT)
     BEGIN
         SELECT orders.ID, orders.cus_uname, itemTmp.name,
-        itemTmp.price, contain.number, orders.total
+        itemTmp.price, contain.number, orders.total, orders.orderTime, orders.state
         FROM orders, contain, (
-            SELECT ID, name, price
+            SELECT ID, name, price,shop_id
             FROM item
         ) AS itemTmp
         WHERE orders.state = "PREPARING" AND contain.shop_id = shop_id
-            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID;
+            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID AND contain.shop_id = itemTmp.shop_id;
+    END //
+CREATE PROCEDURE getShopCanceledOrders (IN shop_id INT)
+    BEGIN
+        SELECT orders.ID, orders.cus_uname, itemTmp.name,
+        itemTmp.price, contain.number, orders.total, orders.orderTime, orders.state
+        FROM orders, contain, (
+            SELECT ID, name, price,shop_id
+            FROM item
+        ) AS itemTmp
+        WHERE orders.state = "CANCELED" AND contain.shop_id = shop_id
+            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID AND contain.shop_id = itemTmp.shop_id;
     END //
 CREATE PROCEDURE getShopCompleteOrders (IN shop_id INT)
     BEGIN
         SELECT orders.ID, orders.cus_uname, itemTmp.name,
-        itemTmp.price, contain.number, orders.total
+        itemTmp.price, contain.number, orders.total, orders.orderTime, orders.state
         FROM orders, contain, (
-            SELECT ID, name, price
+            SELECT ID, name, price,shop_id
             FROM item
         ) AS itemTmp
         WHERE orders.state = "COMPLETED" AND contain.shop_id = shop_id
-            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID;
+            AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID AND contain.shop_id = itemTmp.shop_id;
     END //
 CREATE PROCEDURE getUserOrders (IN cus_uname VARCHAR(20))
     BEGIN
         SELECT orders.ID, shopTmp.name,
-        itemTmp.name, itemTmp.price, contain.number, orders.total
+        itemTmp.name, itemTmp.price, contain.number, orders.total, orders.rate ,orders.state,orders.orderTime
         FROM orders, contain, (
             SELECT ID, name
             FROM shop
         ) AS shopTmp, (
-            SELECT ID, name, price
+            SELECT shop_id,ID, name, price
             FROM item
         ) AS itemTmp
         WHERE orders.state <> "INCART" AND orders.cus_uname = cus_uname
             AND orders.ID = contain.order_id AND contain.shop_id = shopTmp.ID
-            AND contain.item_id = itemTmp.ID;
+            AND contain.item_id = itemTmp.ID AND itemTmp.shop_id = shopTmp.ID;
     END //
 CREATE PROCEDURE updateShopInfo ( 
     IN shop_id INT,
@@ -401,7 +423,7 @@ CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
             BEGIN
                 DECLARE shopID INT DEFAULT 0;
                 DECLARE avgRate INT DEFAULT 0;
-                SELECT shop_id INTO shopID
+                SELECT DISTINCT shop_id INTO shopID
                 FROM contain
                 WHERE NEW.ID = order_id;
 

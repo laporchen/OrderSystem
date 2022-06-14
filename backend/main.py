@@ -340,9 +340,11 @@ def placeOrder():
             message["message"] = "You are not a customer"
             return jsonify(message), 400
         uid = post_data["userID"]
-        sid = post_data["orderID"]
-        stat = sql.placeOrder(uid,sid,post_data["cart"]) 
-        if stat:
+        sid = post_data["storeID"]
+        totalPrice = post_data["total"]
+        cart = post_data["cart"]
+        stat = sql.placeOrder(uid,sid,cart,totalPrice) 
+        if stat == False:
             message["message"] = "failed to place order"
         else:
             message["status"] = "success"
@@ -366,7 +368,7 @@ def placeOrder():
 #     "message": "updated",
 # }
 
-@app.route("/api//api/rateOrder",methods = ['POST'])
+@app.route("/api/rateOrder",methods = ['POST'])
 @jwt_required()
 def rateOrder():
     message = {"status":"failed"}
@@ -375,12 +377,10 @@ def rateOrder():
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
             return jsonify(message), 400
-        uid = post_data["userID"]
-        sid = post_data["storeID"]
         oid = post_data["orderID"]
         rating = post_data["rating"]
-        if sql.rateOrder(uid,sid,oid,rating):
-            message["status"] = "succcess"
+        if sql.rateOrder(oid,rating) == True:
+            message["status"] = "success"
             message["message"] = "update"
         else:
             message["message"] = "failed to update"

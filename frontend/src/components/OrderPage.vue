@@ -4,9 +4,9 @@
         <ul>
         <template v-for="(order,index) in orders" :key="order.orderNumber">
         <li>        
-                <p>Order Date : {{order.orderTime}}</p>
-                <b @click="gotoStore(order.storeID)" style="cursor:pointer">Store : {{order.store}}</b>
-                <div v-if="order.status === 'Completed'">
+                <p>Order Time: {{order.time}}</p>
+                <b @click="gotoStore(order.storeID)" style="cursor:pointer">Store : {{order.storeName}}</b>
+                <div v-if="order.status === 'COMPLETED'">
                     <template v-if="order.rating === 0">
                         <b>Not rated : </b>
                         <template v-for="n in 5" :key="n">
@@ -20,7 +20,7 @@
                     </template>
                 </div>
                 <br v-else>
-                <b :class="{ Completed: 'completed', Canceled: 'canceled', Preparing: 'preparing', Pending: 'pending' }[order.status]">
+                <b :class="{ COMPLETED: 'completed', CANCELED: 'canceled', PREPARING: 'preparing', PENDING: 'pending' }[order.status]">
                             Order Status : {{order.status}}
                 </b>
 
@@ -53,13 +53,7 @@ export default {
 	name: "OrderPage",
 	data() {
 		return {
-            orders : [
-                {orderNumber:1,rating: 4,store:"Striver Pizza",storeID:1,orderItems : [{id: 32,name:"Striver Special",quantity : 1, price :100}, {id : 31,name:"Raj Cola", quantity: 69,price:690}],time:"2022-06-04 13:32",status : "Completed"},
-                {orderNumber:2,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Completed"},
-                {orderNumber:3,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
-                {orderNumber:4,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
-                {orderNumber:5,rating: 0,store:"Demon Burger", storeID:3,orderItems : [{id:2,name:"Corgi Special",quantity : 3,price:420},],time:"2022-06-05 20:32",status : "Canceled"},
-            ]
+            orders : []
 		};
 	},
 	methods: {
@@ -74,6 +68,7 @@ export default {
         async rateOrder(rating,orderNumber,storeID,index) {
             let res = await axios.post("/rateOrder", {
                 "userID" : this.$store.getters.user.user,
+                "isSeller" : this.$store.getters.seller,
                 "storeID" : storeID,
                 "orderID" : orderNumber,
                 "rating" : rating,

@@ -96,13 +96,10 @@ def insertCustomer(user: User):
     global lock
     try:
         name = user.first_name + " " + user.last_name
-        print("insert user " + name)
         sql = f"INSERT INTO CUSTOMER VALUES ('{user.username}','{name}','{user.password}')"
-        print("Execute " + sql)
         lock.acquire()
         cursor.execute(sql)
         db.commit()
-        print(f"user {user.username} inserted") 
         lock.release()
         return True
     except Exception as e:
@@ -116,13 +113,11 @@ def insertSeller(seller: User):
     try:
         name = seller.first_name + " " + seller.last_name
         sql = f"CALL insertMerchant('{seller.username}','{seller.username} store','{seller.password}')"
-        print("Execute " + sql)
         lock.acquire()
         cursor.execute(sql)
         sql = f"CALL insertShop('{seller.username}','{seller.username} Shop','00:00:00','12:00:00',NULL,NULL,' ',' ',' ',' ',' ',0,0)"
         cursor.execute(sql)
         db.commit()
-        print(f"seller {seller.username} inserted") 
         lock.release()
         return True
     except Exception as e:
@@ -211,13 +206,13 @@ def getStoreInfo(sid,isSeller):
                 "no" : addrTuple[6],
                 "floor" : addrTuple[7]
             }
+
         maxID = 0
         for item in items:
             menu.append({
                     "id":item[0],
                     "name":item[2],
                     "price":item[4]
-                
             })
             maxID = max(maxID,item[0])
         res =  {
@@ -292,7 +287,7 @@ def getUserCart(sid,uid):
         oid = 0
         for item in cart:
             oid = item[0]
-            res[item[1]] = item[4]
+            res[item[1]] = item[2]
         lock.release()
         return {"oid":oid,"cart" : res} 
     except Exception as e:
@@ -301,21 +296,91 @@ def getUserCart(sid,uid):
         return {} 
 
 def getAllUserCart(uid):
-    # some sql procedure to get all user cart
-    return [] 
+    global cursor
+    global lock
+    try:
+        lock.acquire()
+        sql = f"CALL getAllUserCart('{uid}')" # get orders procedure
+        cursor.execute(sql)
+        f = cursor.fetchall()
+        print(f)
+        carts = []
+        for cart in f:
+            carts.append({
+                "orderNumber" : cart[0],
+                "storeID" : cart[4],
+                "name": cart[1],
+                "itemCount" : int(cart[2]),
+                "totalPrice" : cart[3]
+            })
+            # should be able to get order item here 
+        
+        lock.release() 
+        return carts 
+    except Exception as e:
+        print(e,"getAllUserCart went wrong")
+        lock.release() 
+        return False
 
 def getStoreOrders(sid):
     # some sql procedure to get store orders
-    return [
-            {"orderNumber":1,"orderDate":"2022/05/19","user":"Striver","orderItems" : [{"id": 32,"name":"Striver Special","quantity" : 1}, {"id" : 31,"name":"Raj Cola", "quantity": 69}],"time":"2022-06-04 13:32","status": "Pending"},
-            {"orderNumber":2,"orderDate":"2022/05/19","user":"Raj","orderItems" : [{"id": 32,"name":"Striver Special","quantity" : 5}],"time":"2022-06-04 13:32","status" : "Completed"},
-            {"orderNumber":4,"orderDate":"2022/05/19","user":"Ra","orderItems" : [{"id": 32,"name":"Striver Special","quantity" : 5}],"time":"2022-06-04 13:32","status" : "Pending"},
-            {"orderNumber":3,"orderDate":"2022/05/19","user":"Rj","orderItems" : [{"id": 32,"name":"Striver Special","quantity" : 5}],"time":"2022-06-04 13:32","status": "Preparing"},
-    ]
+    global cursor
+    global lock
+    try:
+        lock.acquire()
+        sql = f"CALL getShopOrders({sid})"
+        res = {} 
+        orders = []
+        cursor.execute(sql)
+        orderItem = cursor.fetchall()
+        print(orderItem)
+
+        for item in orderItem:
+            if(item[0] not in res):
+                res[item[0]] = {"orderItems" : []}
+            res[item[0]]["orderItems"].append({
+                "name" : item[2],
+                "quantity" : item[4],
+                "price" : item[3] * item[4],
+            })
+            res[item[0]]["user"] = item[1]
+            res[item[0]]["time"] = item[6]
+            res[item[0]]["status"] = item[7]
+            res[item[0]]["total"] = item[5]
+        for k,v in res.items():
+            order = v
+            order["orderNumber"] = k
+            orders.append(order)
+        lock.release() 
+        return orders 
+    except Exception as e:
+        print(e,"getUserOrders went wrong")
+        lock.release() 
+        return None 
 
 def updateStoreOrder(sid, oid, status):
-    # some sql procedure to update store order
-    return True
+    global cursor
+    global db
+    global lock
+    try:
+        lock.acquire()
+        sql = ""
+        if status == "PREPARING":
+            sql = f"CALL receiveOrder({oid})"
+        elif status == "CANCELED":
+            sql = f"CALL cancelOrder({oid})"
+        elif status == "COMPLETED":
+            sql = f"CALL completeOrder({oid})"
+
+        cursor.execute(sql)
+        
+        db.commit()
+        lock.release() 
+        return True 
+    except Exception as e:
+        print(e,"getUserOrders went wrong")
+        lock.release() 
+        return False 
 
 def getUserOrders(uid):
     # some sql procedure to get user orders
@@ -328,16 +393,17 @@ def getUserOrders(uid):
         orderItem = cursor.fetchall()
         res = {} 
         for item in orderItem:
+            if(item[0] not in res):
+                res[item[0]] = {"orderItems" : []}
             res[item[0]]["orderItems"].append({
-                "id" : item[4],
-                "name" : item[3],
-                "quantity" : item[6],
-                "price" : item[5] * item[6],
+                "name" : item[2],
+                "quantity" : item[4],
+                "price" : item[3] * item[4],
             })
-            res[item[0]]["rating"] = item[8]
-            res[item[0]]["storeID"] = item[1]
-            res[item[0]]["time"] = item[9]
-            res[item[0]]["status" ] = item[10]
+            res[item[0]]["rating"] = item[6]
+            res[item[0]]["storeName"] = item[1]
+            res[item[0]]["time"] = item[8]
+            res[item[0]]["status" ] = item[7]
         orders = []
         for k,v in res.items():
             order = v
@@ -366,11 +432,11 @@ def updateFav(uid,sid):
         lock.release() 
         return False
 
-def isUserFav(uid,sid):
+def isUserFav(sid,uid):
     global cursor
     global lock
     try:
-        sql = f"SELECT * FROM FAVORITE WHERE shop_id = {sid} AND cus_name = '{uid}'"
+        sql = f"SELECT * FROM FAVORITE WHERE shop_id = {sid} AND cus_uname = '{uid}'"
         lock.acquire()
         cursor.execute(sql)
 
@@ -407,11 +473,11 @@ def updateCart(uid,sid,cart,total):
         lock.acquire()
         sql = f"CALL getOrderIdAsCart('{uid}',{sid},{total})"
         cursor.execute(sql)
-        oid = cursor.fetchone()[0]
+        res = cursor.fetchall()
+        oid = res[0][0]
         db.commit()
         for itemID,num in cart.items():
             sql = f"CALL updateContainItem({oid},{sid},{int(itemID)},{num})"
-            print("executing ",sql)
             cursor.execute(sql)
 
         db.commit()
@@ -423,13 +489,29 @@ def updateCart(uid,sid,cart,total):
         return False
 
 
-def placeOrder(uid,oid,cart):
+def placeOrder(uid,sid,cart,total):
+    global cursor
+    global db
+    global lock
     try:
-        for k,v in cart:
-           pass 
-            #insert item to order
+        lock.acquire()
+        sql = f"CALL getOrderIdAsCart('{uid}',{sid},{total})"
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        oid = res[0][0]
+        db.commit()
+        for itemID,num in cart.items():
+            sql = f"CALL updateContainItem({oid},{sid},{int(itemID)},{num})"
+            cursor.execute(sql)
+
+        sql = f"CALL placeOrder({oid})"
+        cursor.execute(sql)
+        db.commit()
+        lock.release() 
         return True
     except Exception as e:
+        print(e,"placeOrder failed")
+        lock.release() 
         return False
 
 def clearCart(uid,sid,cart):
@@ -439,60 +521,23 @@ def clearCart(uid,sid,cart):
     except Exception as e:
         return False
 
-def rateOrder(uid,sid,oid,rating):
-    try:
-        #insert rate info
-        return True
-    except Exception as e:
-        return False
-
-def userOrder(uid):
+def rateOrder(oid,rating):
     global cursor
+    global db
     global lock
     try:
         lock.acquire()
-        sql = f"SELECT * FROM ORDERS WHERE cus_uname = '{uid}' AND state <> 'inCart'" # get orders procedure
+        sql = f"CALL rateOrder({oid},{rating})"
+        print(sql)
         cursor.execute(sql)
-        f = cursor.fetchall()
-        orders = []
-        for order in f:
-            # should be able to get order item here 
-            orderItem = []
-            sql = f"SELECT * FROM CONTAIN WHERE order_id = {order[0]}"
-            cursor.execute(sql)
-            items = cursor.fetchall()
-            storeName = ""
-            storeID = 0
-            for item in items:
-                sql = f"SELECT * FROM ITEM WHERE ID = {item[2]} AND shop_id = {item[1]}"
-                storeID = item[1]
-                cursor.execute(sql)
-                itemInfo = cursor.fetchone()
-                orderItem.append({
-                    "id" : itemInfo[0],
-                    "name":itemInfo[2],
-                    "quantity" : item[3],
-                    "price" : itemInfo[4] * item[3]
-                })
-            sql = f"SELECT name FROM SHOP WHERE ID = {storeID}"
-            cursor.execute(sql)
-            storeName = cursor.fetchone()[0]
-
-            orders.append({
-                "orderID" : order[0],
-                "orderTime" : order[4],
-                "total" : order[3],
-                "rating" : order[6],
-                "storeName" : storeName,
-                "orderItems" : orderItem
-            })
-        
+        db.commit()
         lock.release() 
-        return orders
+        return True
     except Exception as e:
-        print("userOrder went wrong")
+        print(e,"rateOrder went wrong")
         lock.release() 
-        return False
+        return False 
+
  
 
 def getUserFav(uid):
@@ -500,7 +545,7 @@ def getUserFav(uid):
     global lock
     try:
         lock.acquire()
-        sql = f"SELECT shop_id FROM FAVORITE WHERE cus_name = '{uid}'"
+        sql = f"SELECT shop_id FROM FAVORITE WHERE cus_uname = '{uid}'"
         cursor.execute(sql)
         fav = cursor.fetchall()
         res = []

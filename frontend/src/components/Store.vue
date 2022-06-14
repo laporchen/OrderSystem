@@ -22,7 +22,7 @@
                 <th>Price</th>
                 <th></th>
             </thead>
-            <tbody v-for="(item) in storeItems" :key="item">
+            <tbody v-for="(item) in storeItems" :key="item.id">
                 <tr>
                     <td style="width:50%">{{item.name}} </td>
                     <td style="width:25%">${{item.price}}</td>
@@ -114,10 +114,19 @@ export default {
         },
         async placeOrder() {
             // fire event to backend
-            let response = await axios.post("/placeOrder",{
+            if(isNaN(this.orderID)) {
+                this.orderID = -1;
+            }
+            let para = {
                 "userID" : this.$store.getters.user.user,
+                "isSeller" : this.$store.getters.seller,
                 "storeID" : this.storeID,
-            })
+                "orderID" : this.orderID,
+                "cart" : this.userCart,
+                "total" : this.caculateTotal()
+            };
+            console.log(para);
+            let response = await axios.post("/placeOrder",para)
             if(response.data?.status === "success") {
                 alert("Order placed.")
                 this.$router.go();
@@ -136,6 +145,7 @@ export default {
                 this.userFav = !this.userFav
             }
         }
+
 	},
 	async beforeCreate() {
         // fetching store data here.
@@ -168,18 +178,18 @@ export default {
         this.userCart = res.data.cart;
         this.userFav = res.data.userFav;
         // assigned users cart to useCart if it exists
+        console.log(this.userCart)
         this.hasItem();
         this.dataFetched = true;
 	},
     async beforeUnmount() {
         // save user's cart to database
-        console.log(this.userCart)
         await axios.post("/updateCart", {
             "userID" : this.$store.getters.user.user,
             "storeID" : this.storeID,
             "cart" : this.userCart,    
             "isSeller" : this.$store.getters.seller,
-            "total" : this.currentTotal,
+            "total" : this.caculateTotal(),
         })
     }
 };

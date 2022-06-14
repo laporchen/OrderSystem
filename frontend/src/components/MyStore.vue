@@ -48,13 +48,13 @@
             <thead>
                 <th>Item</th>
                 <th>Price</th>
-                <th>Sales</th>
+                <th></th>
             </thead>
             <tbody>
                 <tr v-for="(item,index) in storeItems" :key="item.id">
                     <td style="width:40%"><input type="text" placeholder="Item Name" v-model="item.name"> </td>
                     <td style="width:25%"><input type="number" min="0" oninput="validity.valid||(value='');" placerholder="Item Price" v-model="item.price"></td>
-                    <td style="width:15%">{{item.sales}}</td>
+                    <td style="width:15%"></td>
                     <td style="width:15%">
                         <span @click="delItem(index)" id="trashBtn"><i class="fa fa-trash" style="color:red"/></span>
                     </td>
@@ -90,7 +90,7 @@ export default {
             storeRating : 0,
             storeItems : [],
             storeID : null,
-            itemIDcounter : 1,
+            IDcounter : 1,
             oldItem : [],
             delItemID : [],
             modifyItem : [],
@@ -100,13 +100,13 @@ export default {
 	},
 	methods: {
         addNew() {
+            this.IDcounter++;
             this.storeItems.push({
                 id : this.IDcounter,
                 name : "",
                 price : 0,
                 sales : 0
             });
-            this.IDcounter++;
         },
         delItem(index) {
             this.storeItems.splice(index, 1);
@@ -127,6 +127,12 @@ export default {
                     this.modifyItem.push(item);
                 }
             })
+            console.log("modify")
+            console.log(this.modifyItem)
+            console.log("del")
+            console.log(this.delItemID)
+            console.log("new")
+            console.log(this.newItem)
             this.oldItem.forEach((item) => {
                 let contain = this.storeItems.some((storeItem) => {
                     return storeItem.id == item.id;
@@ -185,10 +191,9 @@ export default {
         this.storeAddress = storeInfo.storeAddress;
         this.storeRating = storeInfo.storeRating;
         this.storeItems = storeInfo.storeItems;
-        this.itemIDcounter = storeInfo.IDcounter;
+        this.IDcounter = storeInfo.IDcounter;
         this.oldItem = JSON.parse(JSON.stringify(storeInfo.storeItems));
         this.dataFetched = true;
-        console.log(this.storeAddress)
 	},
     async beforeUnmount() {
     }
