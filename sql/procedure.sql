@@ -245,11 +245,11 @@ CREATE PROCEDURE getShopByID (IN ID INT)
 
 CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, itemTmp.name,
+        SELECT orders.ID, itemTmp.name,itemTmp.ID,
         itemTmp.price, contain.number, orders.total
         FROM orders, contain, (
             SELECT ID, name, price
-            FROM item
+            FROM item 
         ) AS itemTmp
         WHERE orders.state = "INCART" AND orders.cus_uname = cus_uname
             AND contain.shop_id = shop_id AND orders.ID = contain.order_id  
