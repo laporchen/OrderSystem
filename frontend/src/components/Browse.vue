@@ -1,5 +1,5 @@
 <template>
-    <div id="browse">
+    <div id="browse" v-if="dataFetched">
         <div style="text-align:center; padding-bottom:30px"><h2>Browse the food you like.</h2></div>
         <table style="font-size:120%">
             <th style="width:5%">
@@ -57,11 +57,13 @@ export default {
 	data() {
 		return {
             stores: [],
-            maxPrice: 10000,
+            maxPrice: 0,
             minPrice: 0,
             minRating:2,
+            fav : [],
             searchWord: "",
             favOnly : false,
+            dataFetched : false,
 		};
 	},
 	methods: {
@@ -74,7 +76,7 @@ export default {
             store = store[0];
             let storeName = store.name.toLowerCase();
             return  store.priceRange[0] >= this.minPrice && 
-                    store.priceRange[1] <= this.maxPrice && 
+                    ( store.priceRange[1] <= this.maxPrice || this.maxPrice == 0)&& 
                     store.rating >= this.minRating && 
                     storeName.includes(this.searchWord.toLowerCase()) &&
                     (this.favOnly === false || this.userFav(storeID));
@@ -84,7 +86,7 @@ export default {
         },
         userFav(storeID) {
             //something that check the store is in user's favorite
-            return storeID % 2 == 0;
+            return this.fav.includes(storeID);
         },
         updateRating(val) {
             this.minRating = val;
@@ -96,11 +98,16 @@ export default {
 	async created() {
         // fetching data here.
         let filter = {}; // filter rule
-        let res = await axios.post("getStores",filter);
+        let res = await axios.post("/getStores",{
+            "filter" : filter,
+            "userID" : this.$store.getters.user.user,
+        });
         if(res?.data?.status !== "success") {
             this.$router.push("/404");
         }
-        this.stores = res?.data?.stores;
+        this.stores = res.data.stores;
+        this.fav = res.data.fav;
+        this.dataFetched = true;
 	},
 };
 </script>

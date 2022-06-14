@@ -29,8 +29,6 @@ def userExist(username):
     try:
         fetchUserFromCustomer = f"SELECT username FROM Customer where username = '{username}'"
         fetchUserFromSeller = f"SELECT username FROM MERCHANT where username = '{username}'"
-        print(fetchUserFromCustomer)
-        print(fetchUserFromSeller)
         cursor.execute(fetchUserFromCustomer)
         if cursor.rowcount != 0:
             return True 
@@ -48,14 +46,12 @@ def userIsSeller(username):
     global cursor
     try:
         fetchUserFromSeller = f"SELECT username FROM MERCHANT where username = '{username}'"
-        print(fetchUserFromSeller)
         cursor.execute(fetchUserFromSeller)
         return cursor.rowcount == 1
 
     except Exception as e:
         print(e, "something went wrong")
         return False
-
 
 def getUser(username):
     global cursor
@@ -130,10 +126,15 @@ def getStores(filter):
         fetched_shops = cursor.fetchall()
         shops = [] 
         for shop in  fetched_shops:
+            sql = f"SELECT MIN(price),MAX(price) FROM ITEM WHERE shop_id = {shop[0]}"
+            cursor.execute(sql)
+            p = cursor.fetchone()
+            minPrice = p[0]
+            maxPrice = p[1] 
             shops.append({
                 "storeID":shop[0],
                 "name":shop[2],
-                "priceRange": [0,1002],
+                "priceRange": [minPrice,maxPrice],
                 "rating":shop[7]
             })
 
@@ -248,7 +249,7 @@ def getUserCart(sid,uid):
         return {"oid":oid,"cart" : res} 
     except Exception as e:
         print(e,"getUserCart went wrong")
-        return None
+        return {} 
 
 def getAllUserCart(uid):
     # some sql procedure to get all user cart
@@ -271,9 +272,29 @@ def getUserOrders(uid):
     # some sql procedure to get user orders
     global cursor
     try:
-        return []
+        sql = f"CALL getUserOrders('{uid}')"
+        cursor.execute(sql)
+        orderItem = cursor.fetchall()
+        res = {} 
+        for item in orderItem:
+            res[item[0]]["orderItems"].append({
+                "id" : item[4],
+                "name" : item[3],
+                "quantity" : item[6],
+                "price" : item[5] * item[6],
+            })
+            res[item[0]]["rating"] = item[8]
+            res[item[0]]["storeID"] = item[1]
+            res[item[0]]["time"] = item[9]
+            res[item[0]]["status" ] = item[10]
+        orders = []
+        for k,v in res.items():
+            order = v
+            order["orderNumber"] = k
+            orders.append(order)
+        return orders 
     except Exception as e:
-        print("getUserOrders went wrong")
+        print(e,"getUserOrders went wrong")
         return None 
     return []
 
@@ -384,3 +405,19 @@ def userOrder(uid):
         print("userOrder went wrong")
         return False
  
+
+def getUserFav(uid):
+    global cursor
+    try:
+        sql = f"SELECT shop_id FROM FAVORITE WHERE cus_name = '{uid}'"
+        cursor.execute(sql)
+        fav = cursor.fetchall()
+        res = []
+        for f in fav:
+            res.append(f[0])
+        return res 
+    except Exception as e:
+        print(e,"getUserFav went wrong")
+        return False
+
+

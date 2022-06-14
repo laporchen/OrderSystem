@@ -94,7 +94,8 @@ export default {
             "isSeller" : this.$store.getters.seller,
         })
         if(res.data?.status === "success") {
-            //this.orders = res.data.orders;
+            this.orders = res.data.orders;
+            console.log(res.data.orders)
         } 
 	},
 };

@@ -127,9 +127,12 @@ def getStores():
     message = {"status": "fail"}
     if request.method == 'POST':
         post_data = request.get_json()
+        uid = post_data["userID"] 
         search_filter = post_data# get search filter from post_data
         stores = sql.getStores(search_filter) 
+        fav = sql.getUserFav(uid)
         message["stores"] = stores
+        message["fav"]= fav
         message["status"] = "success"
         return jsonify(message), 200
     else:
@@ -414,7 +417,7 @@ def userOrders():
             message["message"] = "You are not a customer"
             return jsonify(message), 400
         uid = post_data["userID"]
-        message["orders"] = sql.userOrder(uid)
+        message["orders"] = sql.getUserOrders(uid)
         message["status"] = "success"
         return jsonify(message)
     else :
