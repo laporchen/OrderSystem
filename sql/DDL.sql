@@ -41,10 +41,10 @@ CREATE TABLE address (
         ON UPDATE CASCADE
 );
 CREATE TABLE favorite (
-    cus_name VARCHAR(20),
+    cus_uname VARCHAR(20),
     shop_id INT UNSIGNED,
-    PRIMARY KEY (cus_name, shop_id),
-    FOREIGN KEY (cus_name) REFERENCES customer(username)
+    PRIMARY KEY (cus_uname, shop_id),
+    FOREIGN KEY (cus_uname) REFERENCES customer(username)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (shop_id) REFERENCES shop(ID)
