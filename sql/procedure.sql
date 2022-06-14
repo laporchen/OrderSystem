@@ -303,7 +303,7 @@ CREATE PROCEDURE getShopCompleteOrders (IN shop_id INT)
         WHERE orders.state = "COMPLETED" AND contain.shop_id = shop_id
             AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID;
     END //
-CREATE PROCEDURE getUserOrders (IN cus_uname INT)
+CREATE PROCEDURE getUserOrders (IN cus_uname VARCHAR(20))
     BEGIN
         SELECT orders.ID, shopTmp.name,
         itemTmp.name, itemTmp.price, contain.number, orders.total
