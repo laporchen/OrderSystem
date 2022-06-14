@@ -48,9 +48,8 @@ CREATE PROCEDURE insertShop (
         DECLARE shopID INT DEFAULT 0;
         INSERT INTO shop
         VALUES (0, mer_uname, name, openTime, closeTime, phone, email, 3);
-        SELECT ID AS shopID 
-        FROM shop
-        WHERE shop.ID = shopID;
+        SELECT MAX(ID) INTO shopID 
+        FROM shop;
         INSERT INTO address
         VALUES (shopID, city, district, road, lane, alley, no, floor);
     END //
@@ -103,7 +102,8 @@ CREATE PROCEDURE updateFav (
             DELETE FROM favorite
             WHERE cus_uname = favorite.cus_uname AND shop_id = favorite.shop_id;
         ELSE
-            CALL insertFav(cus_uname, shop_id);
+            INSERT INTO favorite
+            VALUES(cus_uname, shop_id);
         END IF;
     END //
 CREATE PROCEDURE getOrderIdAsCart (
@@ -121,11 +121,9 @@ CREATE PROCEDURE getOrderIdAsCart (
             BEGIN
                 INSERT INTO orders
                 VALUES (0, cus_uname, "INCART", total, NULL, NULL, 0);
-                SELECT ID INTO order_id
+                SELECT MAX(ID) INTO order_id
                 FROM orders
-                WHERE cus_uname = orders.cus_uname
-                GROUP BY orders.cus_uname
-                HAVING ID = MAX(ID);
+                WHERE cus_uname = orders.cus_uname;
             END;
         END IF;
         SELECT order_id;
