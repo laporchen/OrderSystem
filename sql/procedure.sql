@@ -256,7 +256,7 @@ CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     END //
 CREATE PROCEDURE getAllUserCart (IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, shopTmp.name, SUM(contain.number) AS numberSum, orders.total
+        SELECT orders.ID, shopTmp.name, SUM(contain.number) AS numberSum, orders.total, shopTmp.ID
         FROM orders, contain, (
             SELECT ID, name
             FROM shop
