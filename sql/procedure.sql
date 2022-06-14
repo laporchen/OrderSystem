@@ -109,10 +109,10 @@ CREATE PROCEDURE updateFav (
 CREATE PROCEDURE getOrderIdAsCart (
     IN cus_uname VARCHAR(20),
     IN shop_id INT,
-    IN total INT,
-    OUT order_id INT
+    IN total INT
 )
     BEGIN
+        DECLARE order_id INT DEFAULT 0;
         SELECT ID INTO order_id
         FROM orders, contain
         WHERE ID = contain.order_id AND orders.cus_uname = cus_uname
@@ -128,6 +128,7 @@ CREATE PROCEDURE getOrderIdAsCart (
                 HAVING ID = MAX(ID);
             END;
         END IF;
+        SELECT order_id;
     END //
 CREATE PROCEDURE updateContainItem (
     IN order_id INT,
