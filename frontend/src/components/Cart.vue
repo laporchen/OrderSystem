@@ -2,6 +2,9 @@
     <div id="cart">
         <!-- something like the browse page, but only show stores that user has non empty cart, and also show the total --> 
         <div style="text-align:center; padding-bottom:30px"><h2>Your Carts</h2></div>
+        <div v-if="storeWithCart.length == 0">
+            <h3>Nothing in your cart, go buy something</h3>
+        </div>
         <template v-for="store in storeWithCart" :key="store"> 
             <table style="font-size:120% " @click="gotoStore(store.storeID)">
                 <tbody>
@@ -19,7 +22,7 @@
 
 
 <script> 
-
+import axios from "axios";
 export default {
 	name: "Store",
 	data() {
@@ -32,14 +35,17 @@ export default {
 			this.$router.push("/store/" + storeID);
         },
 	},
-	created() {
+	async created() {
         // fetching store data here.
+        let res = await axios.post("/getCarts", {
+            "userID" : this.$store.getters.user.user,
+            "isSeller" : this.$store.getters.seller,
+        })
         //feteched data is assigned to the page here
-        this.storeWithCart= [
-            {storeID:2,name:"Corgi's Fist", itemCount : 5, totalPrice : 1000},
-            {storeID:1,name:"Raj's Fast Food", itemCount : 5, totalPrice : 1000},
-        ]
-	},
+        if(res.data?.status === "success"){
+            this.storeWithCart = res.data.carts;
+        }
+    }
 };
 </script>
 

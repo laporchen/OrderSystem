@@ -22,7 +22,7 @@
                 <th>Price</th>
                 <th></th>
             </thead>
-            <tbody v-for="(item) in storeItems" :key="item.id">
+            <tbody v-for="(item) in storeItems" :key="item">
                 <tr>
                     <td style="width:50%">{{item.name}} </td>
                     <td style="width:25%">${{item.price}}</td>
@@ -50,7 +50,7 @@
                     <tr>
                         <td style="width:50%">Total : {{caculateTotal()}} </td>
                         <td style="width:25%"></td>
-                        <td style="width:25%"><button class="mt-1 btn btn-danger btn-block" @click="sentOrder()">Place Order</button></td>
+                        <td style="width:25%"><button class="mt-1 btn btn-danger btn-block" @click="placeOrder()">Place Order</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -69,7 +69,7 @@ export default {
             storePhone : null,
             storeAddress : null,
             storeRating : 0,
-            storeItems : [],
+            storeItems : {},
             storeID : null,
             currentTotal : 0,
             userFav : false,
@@ -157,14 +157,28 @@ export default {
         this.storePhone = s.storePhone;
         this.storeAddress = s.storeAddress;
         this.storeRating = s.storeRating;
-        this.storeItems =  s.storeItems;
+        this.orderID = s.orderID;
+        s.storeItems.forEach((item) => {
+            this.storeItems[item.id] = {
+                "id": item.id,
+                "name": item.name,
+                "price": item.price
+            };
+        });
         this.userCart = res.data.cart;
         // assigned users cart to useCart if it exists
         this.hasItem();
         this.dataFetched = true;
 	},
-    beforeUnmount() {
+    async beforeUnmount() {
         // save user's cart to database
+        console.log(this.orderID)
+        await axios.post("/updateCart", {
+            "orderID" : this.orderID,
+            "userID" : this.$store.getters.user.user,
+            "cart" : this.userCart,    
+            "isSeller" : this.$store.getters.seller,
+        })
     }
 };
 </script>

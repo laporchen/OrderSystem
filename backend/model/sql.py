@@ -142,7 +142,7 @@ def getStores(filter):
         print(e, "something went wrong")
         return False
 
-def getStoreInfo(sid):
+def getStoreInfo(sid,isSeller):
     # some sql procedure to get store info
     global cursor
     try:
@@ -160,21 +160,29 @@ def getStoreInfo(sid):
         sql = f"SELECt * FROM ADDRESS WHERE shop_id = {sid}"
         cursor.execute(sql)
         addrTuple = cursor.fetchone()
-        address = f"{addrTuple[1]} {addrTuple[2]} {addrTuple[3]} {addrTuple[4]} {addrTuple[5]} {str(addrTuple[6])} 號 {str(addrTuple[7])} 樓"
-
-
+        address = ""
+        if isSeller == False:
+            address = f"{addrTuple[1]} {addrTuple[2]} {addrTuple[3]} {addrTuple[4]} {addrTuple[5]} {str(addrTuple[6])} 號 {str(addrTuple[7])} 樓"
+        else:
+            address = {
+                "city": addrTuple[1],
+                "district" : addrTuple[2],
+                "road" : addrTuple[3],
+                "lane" : addrTuple[4],
+                "alley": addrTuple[5],
+                "no" : addrTuple[6],
+                "floor" : addrTuple[7]
+            }
         maxID = 0
         for item in items:
             menu.append({
-                {
                     "id":item[0],
                     "name":item[2],
                     "price":item[4]
-                }
+                
             })
             maxID = max(maxID,item[0])
-        
-        return {
+        res =  {
             "storeID" : sid,
             "storeName" : store[2],
             "storePhone" : store[5],
@@ -184,6 +192,7 @@ def getStoreInfo(sid):
             "IDcounter": maxID,  
         }
 
+        return res
     except Exception as e:
         print(e, "getStoreInfo went wrong")
         return None 
@@ -192,24 +201,30 @@ def updateStore(sid,storeInfo):
     global cursor
     global db
     try:
-        modify = storeInfo.modifyItem
-        delID = storeInfo.delItemID
-        newItem = storeInfo.newItem
-
+        modify = storeInfo["modifyItem"]
+        delID = storeInfo["delItemID"]
+        newItem = storeInfo["newItem"]
+        sql = f"CALL updateShopInfo({sid},'{storeInfo['storeName']}','00:00:00','12:00:00','{storeInfo['storePhone']}',NULL)"            
+        cursor.execute(sql)
+        
+        addr = storeInfo["storeAddress"]
+        sql = f"CALL updateShopAddress({sid},'{addr['city']}','{addr['district']}','{addr['road']}','{addr['lane']}','{addr['alley']}',{addr['no']},{addr['floor']})"            
+        cursor.execute(sql)
+        
         try:
             for item in modify:
-                sql = f"CALL modifyItem({sid},{item.id},{item.name},{item.price})"
+                sql = f"CALL updateItem({sid},{item['id']},'{item['name']}',{item['price']})"
                 cursor.execute(sql)
             for did in delID:
-                sql = f"CALL delItem({sid},{did})"
+                sql = f"CALL deleteItem({sid},{did})"
                 cursor.execute(sql)
             for item in newItem:
-                sql = f"CALL insertItem({sid},{item.name},{item.price})"
+                sql = f"CALL insertItem({sid},'{item['name']}',NULL,{item['price']})"
                 cursor.execute(sql)
 
             #update address,phone and shop name
         except Exception as e:
-            print(e, "updateStorewent wrong")
+            print(e, "updateStore went wrong")
             return None 
         db.commit()
         return True
@@ -220,11 +235,24 @@ def updateStore(sid,storeInfo):
 def getUserCart(sid,uid):
     # some sql procedure to get user cart
     global cursor
-    return {}
+    try:
+        sql = f"CALL getUserCart({sid},'{uid}')"
+        cursor.execute(sql)
+        cart = cursor.fetchall()
+        print(cart)
+        res = {}
+        oid = 0
+        for item in cart:
+            oid = item[0]
+            res[item[1]] = item[4]
+        return {"oid":oid,"cart" : res} 
+    except Exception as e:
+        print(e,"getUserCart went wrong")
+        return None
 
 def getAllUserCart(uid):
     # some sql procedure to get all user cart
-    return {}
+    return [] 
 
 def getStoreOrders(sid):
     # some sql procedure to get store orders
@@ -264,9 +292,7 @@ def updateFav(uid,sid):
 def changeUserPassword(uid, npw):
     global cursor
     try:
-        sql = f"UPDATE MERCHANT SET password = '{npw}' WHERE username = '{uid}'"
-        cursor.execute(sql)
-        sql = f"UPDATE CUSTOMER SET password = '{npw}' WHERE username = '{uid}'"
+        sql = f"CALL updatePwd('{uid}','{npw}')"
         cursor.execute(sql)
         db.commit()
         return True
@@ -357,5 +383,4 @@ def userOrder(uid):
     except Exception as e:
         print("userOrder went wrong")
         return False
-    return []
  

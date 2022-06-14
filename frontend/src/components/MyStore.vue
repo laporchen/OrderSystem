@@ -84,8 +84,8 @@ export default {
                 road:"" ,
                 lane:"" ,
                 alley:"",
-                no:"",
-                floor:"",
+                no:0,
+                floor:0,
             },
             storeRating : 0,
             storeItems : [],
@@ -179,7 +179,6 @@ export default {
             this.$router.push("/");
         }
         let storeInfo = response.data.store;
-        console.log(storeInfo)
         this.storeName = storeInfo.storeName;
         this.storeID = storeInfo.storeID;
         this.storePhone = storeInfo.storePhone;
@@ -189,6 +188,7 @@ export default {
         this.itemIDcounter = storeInfo.IDcounter;
         this.oldItem = JSON.parse(JSON.stringify(storeInfo.storeItems));
         this.dataFetched = true;
+        console.log(this.storeAddress)
 	},
     async beforeUnmount() {
     }

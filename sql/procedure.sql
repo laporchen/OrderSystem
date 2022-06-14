@@ -246,7 +246,7 @@ CREATE PROCEDURE getShopByID (IN ID INT)
 
 CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, itemTmp.name,
+        SELECT orders.ID, itemTmp.id,itemTmp.name,
         itemTmp.price, contain.number, orders.total
         FROM orders, contain, (
             SELECT ID, name, price

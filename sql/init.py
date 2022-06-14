@@ -26,16 +26,13 @@ def create():
     except Exception as e:
         print(e)
 
-def source():
+def source(file):
     try:
         global cursor
-        global db
-        sqls = parse_sql("./DDL.sql")
+        sqls = parse_sql(file)
         for sql in sqls:
             cursor.execute(sql)
-        sqls = parse_sql("./procedure.sql")
-        for sql in sqls:
-            cursor.execute(sql)
+        print(f"Script {file} is loaded")
     except Exception as e:
         print(e)
 
@@ -80,7 +77,8 @@ if __name__ == '__main__':
     connect()
     create()
     use()
-    source()
+    source("./DDL.sql")
+    source("./procedure.sql")
     global db
     db.commit()
     print("DONE.")

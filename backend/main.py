@@ -167,8 +167,9 @@ def returnStore():
         message = {}
         if post_data["isSeller"] == False:
             sid = post_data["storeID"]
-            cart = sql.getUserCart(sid, post_data["username"])
-            message["cart"] = cart
+            res = sql.getUserCart(sid, post_data["username"])
+            message["cart"] = res["cart"] 
+            message["orderNumber"] = res["oid"]
         else:
             sid = sql.getUserStore(uid)
 
@@ -176,7 +177,7 @@ def returnStore():
             message = {"status": "failed","message":"Cannot find the store"}
             return jsonify(message)
 
-        store = sql.getStoreInfo(sid)
+        store = sql.getStoreInfo(sid,post_data["isSeller"])
         message["status"] =  "success"
         message["store"] = store
         return jsonify(message)
@@ -314,9 +315,10 @@ def updateCart():
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
             return jsonify(message), 400
-        uid = post_data["UserID"]
-        sid = post_data["StoreID"]
-        stat = sql.updateCart(uid,sid,post_data["cart"])
+        print(post_data)
+        uid = post_data["userID"]
+        oid = post_data["orderID"]
+        stat = sql.updateCart(uid,oid,post_data["cart"])
         if not stat:
             message["message"] = "failtoUpdate"
         else:
