@@ -245,30 +245,21 @@ CREATE PROCEDURE getShopByID (IN ID INT)
 
 CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, itemTmp.id,itemTmp.name,
-        itemTmp.price, contain.number, orders.total
-        FROM orders, contain, (
-            SELECT ID, name, price
-            FROM item
-        ) AS itemTmp
+        SELECT orders.ID, contain.item_id, contain.number
+        FROM orders, contain
         WHERE orders.state = "INCART" AND orders.cus_uname = cus_uname
-            AND contain.shop_id = shop_id AND orders.ID = contain.order_id  
-            AND contain.item_id = itemTmp.ID;
+            AND contain.shop_id = shop_id AND orders.ID = contain.order_id;
     END //
 CREATE PROCEDURE getAllUserCart (IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, shopTmp.name,
-        itemTmp.name, itemTmp.price, contain.number, orders.total
+        SELECT orders.ID, shopTmp.name, SUM(contain.number) AS numberSum, orders.total
         FROM orders, contain, (
             SELECT ID, name
             FROM shop
-        ) AS shopTmp, (
-            SELECT ID, name, price
-            FROM item
-        ) AS itemTmp
+        ) AS shopTmp
         WHERE orders.state = "INCART" AND orders.cus_uname = cus_uname
             AND orders.ID = contain.order_id AND contain.shop_id = shopTmp.ID
-            AND contain.item_id = itemTmp.ID;
+            GROUP BY orders.ID;
     END //
 CREATE PROCEDURE updatePwd(IN uname VARCHAR(20), IN pwd VARCHAR(30))
     BEGIN
