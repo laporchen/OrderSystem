@@ -428,8 +428,12 @@ CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
                 WHERE NEW.ID = order_id;
 
                 SELECT ROUND(AVG(rate)) INTO avgRate
-                FROM contain, orders
-                WHERE shopID = shop_id AND orders.ID = order_id AND rate > 0;
+                FROM (
+                    SELECT order_id, rate
+                    FROM order, contain
+                    WHERE shopID = shop_id AND orders.ID = order_id AND rate > 0;
+                    GROUP BY order_id
+                );
 
                 UPDATE shop
                 SET rate = avgRate
