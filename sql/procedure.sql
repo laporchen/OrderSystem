@@ -113,7 +113,7 @@ CREATE PROCEDURE getOrderIdAsCart (
 )
     BEGIN
         DECLARE order_id INT DEFAULT 0;
-        SELECT ID INTO order_id
+        SELECT DISTINCT ID INTO order_id
         FROM orders, contain
         WHERE ID = contain.order_id AND orders.cus_uname = cus_uname
             AND shop_id = contain.shop_id AND orders.state = "INCART";
