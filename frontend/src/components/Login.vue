@@ -50,9 +50,10 @@ export default {
 				alert("username or password is incorrect");
 				return;
 			} else {
-				await localStorage.setItem("token", response.data.token);
+				localStorage.setItem("token", response.data.token);
 				await this.$store.dispatch("user", response.data);
 				await this.$store.dispatch("seller", response.data.isSeller);
+				axios.defaults.headers['Authorization'] = `Bearer ${response.data.token}`;
 				if(response.data.isSeller) {
 					this.$router.push("/myStore");
 				}
@@ -61,6 +62,8 @@ export default {
 				}
 			}
 		},
+		async created() {
+		}
 	},
 };
 </script>

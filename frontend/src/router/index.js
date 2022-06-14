@@ -63,6 +63,7 @@ router.beforeEach((to) => {
   const sellerPath = ["/myStore", "/myOrders","/setting"];
   const userPath = ["/browse", "/cart", "/orders", "/favorite","/store","/","/setting"];
 
+
   if(store.getters.seller === true) {
     if(sellerPath.includes(to.path)) {
       return;

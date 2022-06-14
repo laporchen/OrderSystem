@@ -82,9 +82,9 @@ import { mapGetters } from "vuex";
 export default {
 	name: "Nav",
 	methods: {
-		logoutHandle() {
+		async logoutHandle() {
 			localStorage.removeItem("token");
-			this.$store.dispatch("user", null);
+			await this.$store.dispatch("user", null);
 			this.$router.push("/login");
 		},
 	},

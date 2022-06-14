@@ -24,10 +24,10 @@ const store = createStore({
         }
     },
     mutations: {
-        user(state, user) {
+        async user(state, user) {
             state.user = user;
         },
-        seller(state, seller) {
+        async seller(state, seller) {
             state.seller = seller;
         }
     }
