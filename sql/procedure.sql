@@ -98,12 +98,12 @@ CREATE PROCEDURE updateFav (
         IF EXISTS(
             SELECT cus_uname
             FROM favorite
-            WHERE cus_uname = favorite.cus_name AND shop_id = favorite.shop_id
+            WHERE cus_uname = favorite.cus_uname AND shop_id = favorite.shop_id
         ) THEN
             DELETE FROM favorite
-            WHERE cus_uname = favorite.cus_name AND shop_id = favorite.shop_id;
+            WHERE cus_uname = favorite.cus_uname AND shop_id = favorite.shop_id;
         ELSE
-            INSERT INTO favorite VALUES(cus_uname, shop_id);
+            CALL insertFav(cus_uname, shop_id);
         END IF;
     END //
 CREATE PROCEDURE getOrderIdAsCart (
@@ -246,7 +246,7 @@ CREATE PROCEDURE getShopByID (IN ID INT)
 
 CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, itemTmp.id,itemTmp.name,
+        SELECT orders.ID, itemTmp.name,
         itemTmp.price, contain.number, orders.total
         FROM orders, contain, (
             SELECT ID, name, price
@@ -313,10 +313,10 @@ CREATE PROCEDURE getShopCompleteOrders (IN shop_id INT)
         WHERE orders.state = "COMPLETED" AND contain.shop_id = shop_id
             AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID;
     END //
-CREATE PROCEDURE getUserOrders (IN cus_uname VARCHAR(20))
+CREATE PROCEDURE getUserOrders (IN cus_uname INT)
     BEGIN
-        SELECT orders.ID, shopTmp.ID, shopTmp.name,
-        itemTmp.name,itemTmp.ID, itemTmp.price, contain.number, orders.total, orders.rate, orders.orderTime, orders.state
+        SELECT orders.ID, shopTmp.name,
+        itemTmp.name, itemTmp.price, contain.number, orders.total
         FROM orders, contain, (
             SELECT ID, name
             FROM shop

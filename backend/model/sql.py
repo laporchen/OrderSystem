@@ -70,8 +70,8 @@ def getUser(username):
         return user 
 
     except Exception as e:
-        print(e, "something went wrong")
-        return False
+        print(e, "getUser went wrong")
+        return None 
 
 def insertCustomer(user: User):
     global cursor
@@ -307,7 +307,7 @@ def updateFav(uid,sid):
 
         return True
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "updateFav went wrong")
         return False
 
 def changeUserPassword(uid, npw):
@@ -322,26 +322,31 @@ def changeUserPassword(uid, npw):
         return False
 
 
-def updateCart(uid,oid,cart):
+def updateCart(uid,sid,cart,total):
+    global cursor
+    global db
     try:
-        for key in cart:
-            #check item in cart
-            exist = 0
-            if exist:
-                pass
-                #update cart item
-            else:
-                pass
-            #insert into cart
+        oid = 0
+        cursor.execute("SET @order_id = NULL")
+        sql = f"CALL getOrderIdAsCart('{uid}',{sid},{total},@order_id)"
+        cursor.execute(sql)
+        print(oid)
+        oid = cursor.fetchone()[0]
+        for itemID,num in cart:
+            sql = f"CALL updateContainItem({oid},{sid},{itemID},{num})"
+            cursor.execute(sql)
+
+        db.commit()
         return True
     except Exception as e:
+        print(e,"updateCart failed")
         return False
 
 
 def placeOrder(uid,oid,cart):
     try:
-        for key in cart:
-            pass
+        for k,v in cart:
+           pass 
             #insert item to order
         return True
     except Exception as e:

@@ -1,10 +1,3 @@
-import datetime
-from email import message
-from glob import escape
-
-from requests import post
-
-
 from model.classes import *
 import model.sql as sql
 
@@ -148,6 +141,11 @@ def returnUser():
             current_user = get_jwt_identity()
             # check is seller or not
             user = sql.getUser(current_user)
+            if user == None:
+                message = {"status": "failure",
+                        "message": "Error in getting user info"}
+                return jsonify(message)
+
             message = {"status": "success", "user": user.username,"isSeller": user.is_seller}
             return jsonify(message)
         except Exception:
@@ -318,10 +316,9 @@ def updateCart():
         if post_data["isSeller"] == True:
             message["message"] = "You are not a customer"
             return jsonify(message), 400
-        print(post_data)
         uid = post_data["userID"]
-        oid = post_data["orderID"]
-        stat = sql.updateCart(uid,oid,post_data["cart"])
+        sid = post_data["storeID"]
+        stat = sql.updateCart(uid,sid,post_data["cart"],post_data["total"])
         if not stat:
             message["message"] = "failtoUpdate"
         else:

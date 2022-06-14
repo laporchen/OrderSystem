@@ -172,12 +172,18 @@ export default {
 	},
     async beforeUnmount() {
         // save user's cart to database
-        console.log(this.orderID)
+        let oid = this.orderID;
+        if(isNaN(oid)){
+            oid = -1;
+        }
+        console.log(this.userCart)
         await axios.post("/updateCart", {
-            "orderID" : this.orderID,
+            "orderID" : oid,
             "userID" : this.$store.getters.user.user,
+            "storeID" : this.storeID,
             "cart" : this.userCart,    
             "isSeller" : this.$store.getters.seller,
+            "total" : this.currentTotal,
         })
     }
 };
