@@ -171,6 +171,7 @@ def returnStore():
             res = sql.getUserCart(sid, post_data["username"])
             message["cart"] = res["cart"] 
             message["orderNumber"] = res["oid"]
+            message["userFav"] = sql.isUserFav(post_data["storeID"],post_data["username"])
         else:
             sid = sql.getUserStore(uid)
 

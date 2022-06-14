@@ -117,7 +117,7 @@ CREATE PROCEDURE getOrderIdAsCart (
         FROM orders, contain
         WHERE ID = contain.order_id AND orders.cus_uname = cus_uname
             AND shop_id = contain.shop_id AND orders.state = "INCART";
-        IF order_id IS NULL THEN
+        IF order_id = 0 THEN
             BEGIN
                 INSERT INTO orders
                 VALUES (0, cus_uname, "INCART", total, NULL, NULL, 0);

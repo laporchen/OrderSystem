@@ -166,19 +166,15 @@ export default {
             };
         });
         this.userCart = res.data.cart;
+        this.userFav = res.data.userFav;
         // assigned users cart to useCart if it exists
         this.hasItem();
         this.dataFetched = true;
 	},
     async beforeUnmount() {
         // save user's cart to database
-        let oid = this.orderID;
-        if(isNaN(oid)){
-            oid = -1;
-        }
         console.log(this.userCart)
         await axios.post("/updateCart", {
-            "orderID" : oid,
             "userID" : this.$store.getters.user.user,
             "storeID" : this.storeID,
             "cart" : this.userCart,    

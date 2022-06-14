@@ -1,5 +1,7 @@
 import pymysql
+import threading
 from .classes import * 
+
 
 db_settings = {
     "host": "localhost",
@@ -17,6 +19,8 @@ def main():
     try:
         global db
         global cursor 
+        global lock
+        lock = threading.Lock()
         db = pymysql.connect(**db_settings)
         cursor = db.cursor()
         return cursor
@@ -26,40 +30,52 @@ def main():
 
 def userExist(username):
     global cursor
+    global lock
     try:
         fetchUserFromCustomer = f"SELECT username FROM Customer where username = '{username}'"
         fetchUserFromSeller = f"SELECT username FROM MERCHANT where username = '{username}'"
+        lock.acquire() 
         cursor.execute(fetchUserFromCustomer)
         if cursor.rowcount != 0:
+            lock.release() 
             return True 
         cursor.execute(fetchUserFromSeller)
         if cursor.rowcount != 0:
+            lock.release() 
             return True 
 
+        lock.release() 
         return False 
 
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "userExist went wrong")
+        lock.release() 
         return False
 
 def userIsSeller(username):
     global cursor
+    global lock
     try:
         fetchUserFromSeller = f"SELECT username FROM MERCHANT where username = '{username}'"
+        lock.acquire()
         cursor.execute(fetchUserFromSeller)
+        lock.release() 
         return cursor.rowcount == 1
 
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "userIsSeller went wrong")
+        lock.release() 
         return False
 
 def getUser(username):
     global cursor
+    global lock
     try:
         fetchUserFromCustomer = f"SELECT * FROM Customer where username = '{username}'"
         fetchUserFromSeller = f"SELECT * FROM MERCHANT where username = '{username}'"
         isSeller = userIsSeller(username)
 
+        lock.acquire()
         if isSeller:
             cursor.execute(fetchUserFromSeller)
         else:
@@ -67,61 +83,77 @@ def getUser(username):
             
         userTuple = cursor.fetchone()
         user = User(userTuple[0],userTuple[2],None,None,isSeller)
+        lock.release() 
         return user 
 
     except Exception as e:
         print(e, "getUser went wrong")
+        lock.release() 
         return None 
 
 def insertCustomer(user: User):
     global cursor
+    global lock
     try:
         name = user.first_name + " " + user.last_name
         print("insert user " + name)
         sql = f"INSERT INTO CUSTOMER VALUES ('{user.username}','{name}','{user.password}')"
         print("Execute " + sql)
+        lock.acquire()
         cursor.execute(sql)
         db.commit()
         print(f"user {user.username} inserted") 
+        lock.release()
         return True
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "insertCustomer went wrong")
+        lock.release()
         return False
 
 def insertSeller(seller: User):
     global cursor
+    global lock
     try:
         name = seller.first_name + " " + seller.last_name
         sql = f"CALL insertMerchant('{seller.username}','{seller.username} store','{seller.password}')"
         print("Execute " + sql)
+        lock.acquire()
         cursor.execute(sql)
         sql = f"CALL insertShop('{seller.username}','{seller.username} Shop','00:00:00','12:00:00',NULL,NULL,' ',' ',' ',' ',' ',0,0)"
         cursor.execute(sql)
         db.commit()
         print(f"seller {seller.username} inserted") 
+        lock.release()
         return True
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "isertSeller went wrong")
+        lock.release()
         return False
 
 def getUserStore(uid):
     # query get uid's store
     global cursor
+    global lock
     try:
         sql = f"SELECT ID FROM SHOP WHERE mer_uname = '{uid}'" # some precedure that can get shopID,shopName,shopAddress,minPrice,maxPrice,rating
+        lock.acquire()
         cursor.execute(sql)
+        lock.release()
         if cursor.rowcount == 0:
             return None
         return cursor.fetchone()[0] 
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "getUserStore went wrong")
+        lock.release()
         return False
 
 def getStores(filter):
     # some sql procedure to get stores
     global cursor
+    global lock
     try:
         sql = "SELECT * FROM SHOP" # some precedure that can get shopID,shopName,shopAddress,minPrice,maxPrice,rating
+        lock.acquire()
         cursor.execute(sql)
         fetched_shops = cursor.fetchall()
         shops = [] 
@@ -137,19 +169,24 @@ def getStores(filter):
                 "priceRange": [minPrice,maxPrice],
                 "rating":shop[7]
             })
+        lock.release()
 
         return shops 
     except Exception as e:
-        print(e, "something went wrong")
+        print(e, "getStores went wrong")
+        lock.release()
         return False
 
 def getStoreInfo(sid,isSeller):
     # some sql procedure to get store info
     global cursor
+    global lock
     try:
         sql = f"SELECT * FROM SHOP WHERE ID = {sid}" # some precedure that can get shopID,shopName,shopAddress,minPrice,maxPrice,rating
+        lock.acquire()
         cursor.execute(sql)
         if cursor.rowcount == 0:
+            lock.release()
             return None
         store = cursor.fetchone()
 
@@ -192,16 +229,20 @@ def getStoreInfo(sid,isSeller):
             "storeItems": menu,
             "IDcounter": maxID,  
         }
+        lock.release() 
 
         return res
     except Exception as e:
         print(e, "getStoreInfo went wrong")
+        lock.release() 
         return None 
     
 def updateStore(sid,storeInfo):
     global cursor
     global db
+    global lock
     try:
+        lock.acquire()
         modify = storeInfo["modifyItem"]
         delID = storeInfo["delItemID"]
         newItem = storeInfo["newItem"]
@@ -226,18 +267,24 @@ def updateStore(sid,storeInfo):
             #update address,phone and shop name
         except Exception as e:
             print(e, "updateStore went wrong")
+            lock.release() 
             return None 
         db.commit()
+        lock.release() 
         return True
     except Exception as e:
         print(e, "updateStorewent wrong")
+        lock.release() 
         return False 
 
 def getUserCart(sid,uid):
     # some sql procedure to get user cart
     global cursor
+    global lock
     try:
         sql = f"CALL getUserCart({sid},'{uid}')"
+        lock.acquire()
+        
         cursor.execute(sql)
         cart = cursor.fetchall()
         print(cart)
@@ -246,9 +293,11 @@ def getUserCart(sid,uid):
         for item in cart:
             oid = item[0]
             res[item[1]] = item[4]
+        lock.release()
         return {"oid":oid,"cart" : res} 
     except Exception as e:
         print(e,"getUserCart went wrong")
+        lock.release() 
         return {} 
 
 def getAllUserCart(uid):
@@ -271,7 +320,9 @@ def updateStoreOrder(sid, oid, status):
 def getUserOrders(uid):
     # some sql procedure to get user orders
     global cursor
+    global lock
     try:
+        lock.acquire()
         sql = f"CALL getUserOrders('{uid}')"
         cursor.execute(sql)
         orderItem = cursor.fetchall()
@@ -292,54 +343,83 @@ def getUserOrders(uid):
             order = v
             order["orderNumber"] = k
             orders.append(order)
+        lock.release() 
         return orders 
     except Exception as e:
         print(e,"getUserOrders went wrong")
+        lock.release() 
         return None 
-    return []
 
 def updateFav(uid,sid):
     global cursor
+    global lock
     try:
+        lock.acquire()
         sql = f"CALL updateFav('{uid}',{sid})"
         cursor.execute(sql)
         db.commit()
+        lock.release() 
 
         return True
     except Exception as e:
         print(e, "updateFav went wrong")
+        lock.release() 
         return False
+
+def isUserFav(uid,sid):
+    global cursor
+    global lock
+    try:
+        sql = f"SELECT * FROM FAVORITE WHERE shop_id = {sid} AND cus_name = '{uid}'"
+        lock.acquire()
+        cursor.execute(sql)
+
+        res = cursor.rowcount == 1
+
+        lock.release()
+        return res 
+    except Exception as e:
+        print(e,"isUserFav went wrong")
+        lock.release() 
+        return False 
 
 def changeUserPassword(uid, npw):
     global cursor
+    global lock
     try:
+        lock.acquire()
         sql = f"CALL updatePwd('{uid}','{npw}')"
         cursor.execute(sql)
         db.commit()
+        lock.release() 
         return True
     except Exception as e:
         print("changeUserPassword went wrong")
+        lock.release() 
         return False
 
 
 def updateCart(uid,sid,cart,total):
     global cursor
     global db
+    global lock
     try:
-        oid = 0
-        cursor.execute("SET @order_id = NULL")
-        sql = f"CALL getOrderIdAsCart('{uid}',{sid},{total},@order_id)"
+        lock.acquire()
+        sql = f"CALL getOrderIdAsCart('{uid}',{sid},{total})"
         cursor.execute(sql)
-        print(oid)
         oid = cursor.fetchone()[0]
-        for itemID,num in cart:
-            sql = f"CALL updateContainItem({oid},{sid},{itemID},{num})"
+        db.commit()
+        for itemID,num in cart.items():
+            sql = f"CALL updateContainItem({oid},{sid},{int(itemID)},{num})"
+            print("executing ",sql)
             cursor.execute(sql)
 
         db.commit()
+        lock.release() 
         return True
     except Exception as e:
         print(e,"updateCart failed")
+        lock.release() 
         return False
 
 
@@ -368,7 +448,9 @@ def rateOrder(uid,sid,oid,rating):
 
 def userOrder(uid):
     global cursor
+    global lock
     try:
+        lock.acquire()
         sql = f"SELECT * FROM ORDERS WHERE cus_uname = '{uid}' AND state <> 'inCart'" # get orders procedure
         cursor.execute(sql)
         f = cursor.fetchall()
@@ -405,24 +487,30 @@ def userOrder(uid):
                 "orderItems" : orderItem
             })
         
+        lock.release() 
         return orders
     except Exception as e:
         print("userOrder went wrong")
+        lock.release() 
         return False
  
 
 def getUserFav(uid):
     global cursor
+    global lock
     try:
+        lock.acquire()
         sql = f"SELECT shop_id FROM FAVORITE WHERE cus_name = '{uid}'"
         cursor.execute(sql)
         fav = cursor.fetchall()
         res = []
         for f in fav:
             res.append(f[0])
+        lock.release() 
         return res 
     except Exception as e:
         print(e,"getUserFav went wrong")
+        lock.release() 
         return False
 
 
