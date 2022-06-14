@@ -128,7 +128,7 @@ CREATE PROCEDURE getOrderIdAsCart (
         ELSE
             UPDATE orders
             SET orders.total = total
-            WHERE order_id = orders.order_id;
+            WHERE orders.ID = order_id;
         END IF;
         SELECT order_id;
     END //
