@@ -20,5 +20,19 @@ npm run build
 npm run lint
 ```
 
+### API setting
+```js
+In src/axios.js
+
+axios.defaults.baseURL = "your api url"
+```
+
+### nginx setting
+```
+location /dist {
+    try_files $uri $uri/ /dist/index.html
+}
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
