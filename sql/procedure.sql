@@ -190,7 +190,7 @@ CREATE PROCEDURE rateOrder (IN order_id INT, IN rate TINYINT)
     BEGIN
         UPDATE orders
         SET orders.rate = rate
-        WHERE orders.ID = rate;
+        WHERE orders.ID = order_id;
     END //
 CREATE FUNCTION checkUsernameAvail (uname VARCHAR(20))
 RETURNS BOOL
@@ -256,14 +256,14 @@ CREATE PROCEDURE getUserCart (IN shop_id INT, IN cus_uname VARCHAR(20))
     END //
 CREATE PROCEDURE getAllUserCart (IN cus_uname VARCHAR(20))
     BEGIN
-        SELECT orders.ID, shopTmp.name, SUM(contain.number) AS numberSum, orders.total, shopTmp.ID
+        SELECT max(orders.ID), max(shopTmp.name), SUM(contain.number) AS numberSum, max(orders.total), max(shopTmp.ID)
         FROM orders, contain, (
             SELECT ID, name
             FROM shop
         ) AS shopTmp
         WHERE orders.state = "INCART" AND orders.cus_uname = cus_uname
             AND orders.ID = contain.order_id AND contain.shop_id = shopTmp.ID
-            GROUP BY orders.ID;
+        GROUP BY orders.ID;
     END //
 CREATE PROCEDURE updatePwd(IN uname VARCHAR(20), IN pwd VARCHAR(30))
     BEGIN
@@ -284,7 +284,7 @@ CREATE PROCEDURE getShopOrders(IN sid INT)
         ) AS itemTmp
         WHERE orders.state <> "INCART" AND contain.shop_id = sid
             AND orders.ID = contain.order_id AND contain.item_id = itemTmp.ID AND itemTmp.shop_id = sid;
-    END
+    END //
 CREATE PROCEDURE getShopPendingOrders (IN shop_id INT)
     BEGIN
         SELECT orders.ID, orders.cus_uname, itemTmp.name,
@@ -342,7 +342,7 @@ CREATE PROCEDURE getUserOrders (IN cus_uname VARCHAR(20))
         ) AS itemTmp
         WHERE orders.state <> "INCART" AND orders.cus_uname = cus_uname
             AND orders.ID = contain.order_id AND contain.shop_id = shopTmp.ID
-            AND contain.item_id = itemTmp.ID AND itemTmp.shop_id = shopTmp.ID;
+            AND contain.item_id = itemTmp.ID AND itemTmp.shop_id = shopTmp.ID AND contain.shop_id = itemTmp.shop_id;
     END //
 CREATE PROCEDURE updateShopInfo ( 
     IN shop_id INT,
@@ -427,13 +427,13 @@ CREATE TRIGGER updateAvgRate AFTER UPDATE ON orders
                 FROM contain
                 WHERE NEW.ID = order_id;
 
-                SELECT ROUND(AVG(rate)) INTO avgRate
+                SELECT ROUND(AVG(b.rate)) INTO avgRate
                 FROM (
                     SELECT order_id, rate
-                    FROM order, contain
-                    WHERE shopID = shop_id AND orders.ID = order_id AND rate > 0;
+                    FROM orders, contain
+                    WHERE shopID = shop_id AND orders.ID = order_id AND rate > 0
                     GROUP BY order_id
-                );
+                ) as b;
 
                 UPDATE shop
                 SET rate = avgRate
