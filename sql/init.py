@@ -8,6 +8,7 @@ db_settings = {
     "password": "12345678",
     "charset": "utf8"
 }
+db_name = "team18"
 
 def connect():
     try:
@@ -21,8 +22,9 @@ def connect():
 def create():
     try:
         global cursor
+        global db_name
         global db
-        cursor.execute("CREATE DATABASE OrderSystem")
+        cursor.execute(f"CREATE DATABASE {db_name}")
     except Exception as e:
         print(e)
 
@@ -39,8 +41,9 @@ def source(file):
 def use():
     try:
         global cursor
+        global db_name
         global db
-        cursor.execute("USE OrderSystem")
+        cursor.execute(f"USE {db_name}")
     except Exception as e:
         print(e)
 
